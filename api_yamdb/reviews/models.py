@@ -14,4 +14,3 @@ class User(AbstractUser):
     bio = models.TextField(blank=True)
     role = models.CharField(max_length=15, choices=ROLE_CHOICES,
                             default='USER', verbose_name='role')
-    REQUIRED_FIELDS = ['username', 'email']
