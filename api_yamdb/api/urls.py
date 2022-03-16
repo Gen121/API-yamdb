@@ -5,7 +5,7 @@ from rest_framework import routers
 from .views import CategoryViewSet, GenreViewSet, TitleViewSet
 
 router = routers.SimpleRouter()
-router.register('сategories', CategoryViewSet)
+router.register('categories', CategoryViewSet)
 router.register('genres', GenreViewSet)
 router.register('titles', TitleViewSet)
 
