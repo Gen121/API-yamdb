@@ -1,9 +1,10 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import filters, pagination, permissions, viewsets, mixins
 
-from reviews.models import Category, Genre, Title
-from .serializers import CategorySerializer, GenreSerializer, TitleSerializer
-from .permissions import AdminOrReadOnnly
+from reviews.models import Category, Genre, Title, User
+from .serializers import (CategorySerializer, GenreSerializer, TitleSerializer,
+                          UserSerializer)
+from .permissions import Admin, AdminOrReadOnnly
 
 
 class CategoryViewSet(mixins.CreateModelMixin,
@@ -30,3 +31,11 @@ class TitleViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         return super().create(request, *args, **kwargs)
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = (Admin,)
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('user__username',)
