@@ -3,6 +3,7 @@ from rest_framework import filters, pagination, permissions, viewsets, mixins
 
 from reviews.models import Category, Genre, Title
 from .serializers import CategorySerializer, GenreSerializer, TitleSerializer
+from .permissions import AdminOrReadOnnly
 
 
 class CategoryViewSet(mixins.CreateModelMixin,
@@ -11,6 +12,7 @@ class CategoryViewSet(mixins.CreateModelMixin,
                       viewsets.GenericViewSet,):
     serializer_class = CategorySerializer
     queryset = Category.objects.all()
+    permission_classes = (AdminOrReadOnnly,)
 
 
 class GenreViewSet(mixins.CreateModelMixin,
@@ -19,8 +21,12 @@ class GenreViewSet(mixins.CreateModelMixin,
                    viewsets.GenericViewSet,):
     serializer_class = GenreSerializer
     queryset = Genre.objects.all()
+    permission_classes = (AdminOrReadOnnly,)
 
 
 class TitleViewSet(viewsets.ModelViewSet):
     serializer_class = TitleSerializer
     queryset = Title.objects.all()
+
+    def create(self, request, *args, **kwargs):
+        return super().create(request, *args, **kwargs)
