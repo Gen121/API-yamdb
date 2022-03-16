@@ -18,7 +18,7 @@ class GenreSerializer(serializers.ModelSerializer):
 
 
 class TitleSerializer(serializers.ModelSerializer):
-    category = CategorySerializer(many=True, required=False)
+    category = CategorySerializer(required=False)
     genre = GenreSerializer(many=True, required=False)
 
     class Meta:
