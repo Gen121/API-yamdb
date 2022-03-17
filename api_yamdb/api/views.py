@@ -12,6 +12,7 @@ class CategoryViewSet(mixins.CreateModelMixin,
                       viewsets.GenericViewSet,):
     serializer_class = CategorySerializer
     queryset = Category.objects.all()
+    pagination_class = pagination.PageNumberPagination
     permission_classes = (AdminOrReadOnnly,)
 
 
@@ -21,12 +22,15 @@ class GenreViewSet(mixins.CreateModelMixin,
                    viewsets.GenericViewSet,):
     serializer_class = GenreSerializer
     queryset = Genre.objects.all()
+    pagination_class = pagination.PageNumberPagination
     permission_classes = (AdminOrReadOnnly,)
 
 
 class TitleViewSet(viewsets.ModelViewSet):
     serializer_class = TitleSerializer
     queryset = Title.objects.all()
+    pagination_class = pagination.PageNumberPagination
+    permission_classes = (AdminOrReadOnnly,)
 
     def create(self, request, *args, **kwargs):
         return super().create(request, *args, **kwargs)
