@@ -71,7 +71,7 @@ class Review(models.Model):
         ),
         error_messages={'validators': 'Оценка должна быть от 1 до 10'}
     )
-    pud_date = models.DateTimeField(
+    pub_date = models.DateTimeField(
         verbose_name='Дата публикации отзыва',
         auto_now_add=True,
         db_index=True
