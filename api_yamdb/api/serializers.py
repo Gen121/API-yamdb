@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from reviews.models import Category, Genre, Title, User
+from reviews.models import Category, Genre, GenreTitle, Title, User
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -18,13 +18,18 @@ class GenreSerializer(serializers.ModelSerializer):
 
 
 class TitleSerializer(serializers.ModelSerializer):
-    category = CategorySerializer(required=False)
-    genre = GenreSerializer(many=True, required=False)
+    category = CategorySerializer(read_only=True)
+    genre = GenreSerializer(many=True, read_only=True)
 
     class Meta:
         model = Title
         fields = ('id', 'name', 'year', 'rating',
                   'description', 'genre', 'category', )
+
+    def validate_category(self, value):
+        if type(value) != str:
+            raise serializers.ValidationError(
+                'Категория дожна быть передана в виде строки')
 
     def validate_genre(self, value):
         if type(value) != list:
@@ -40,9 +45,8 @@ class TitleSerializer(serializers.ModelSerializer):
         genres = validated_data.pop('genre')
         title = Title.objects.create(**validated_data)
         for genre in genres:
-            current_genre = Genre.objects.get(slug=genre)
-            current_genre.objects.create(
-                genre=current_genre, title=title)
+            GenreTitle.objects.create(
+                genre=genre, title=title)
             return title
 
 
