@@ -35,6 +35,17 @@ class TitleViewSet(viewsets.ModelViewSet):
     pagination_class = pagination.PageNumberPagination
     permission_classes = (AdminOrReadOnnly,)
 
+    def perform_create(self, serializer):
+        category_data = self.request.data['category']
+        category = get_object_or_404(Category, slug=category_data)
+        genre_data = self.request.data['genre']
+        genre_list = [get_object_or_404(Genre, slug=i) for i in genre_data]
+
+        serializer.save(
+            category=category,
+            genre=genre_list)
+
+
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
