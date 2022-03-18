@@ -17,16 +17,25 @@ class Title(models.Model):
     year = models.IntegerField()
     rating = models.IntegerField(null=True)
     description = models.TextField(
-        null=True,
         blank=True)
     genre = models.ManyToManyField(
         'Genre',
-        related_name='title', )
+        through='GenreTitle',
+        blank=True,
+        null=True, )
     category = models.ForeignKey(
         'Category',
         on_delete=models.SET_NULL,
         related_name='titles',
+        blank=True,
         null=True, )
+
+
+class GenreTitle(models.Model):
+    genre = models.ForeignKey(Genre,
+                              related_name='titles',
+                              on_delete=models.CASCADE)
+    title = models.ForeignKey(Title, on_delete=models.CASCADE)
 
 
 class User(AbstractUser):

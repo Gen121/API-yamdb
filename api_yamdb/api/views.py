@@ -33,9 +33,6 @@ class TitleViewSet(viewsets.ModelViewSet):
     pagination_class = pagination.PageNumberPagination
     permission_classes = (AdminOrReadOnnly,)
 
-    def create(self, request, *args, **kwargs):
-        return super().create(request, *args, **kwargs)
-
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
