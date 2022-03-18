@@ -13,8 +13,9 @@ class CategoryViewSet(mixins.CreateModelMixin,
                       viewsets.GenericViewSet,):
     serializer_class = CategorySerializer
     queryset = Category.objects.all()
+    lookup_field = 'slug'
     pagination_class = pagination.PageNumberPagination
-    permission_classes = (AdminOrReadOnnly,)
+    permission_classes = (AdminOrReadOnnly)
 
 
 class GenreViewSet(mixins.CreateModelMixin,
@@ -23,8 +24,9 @@ class GenreViewSet(mixins.CreateModelMixin,
                    viewsets.GenericViewSet,):
     serializer_class = GenreSerializer
     queryset = Genre.objects.all()
+    lookup_field = 'slug'
     pagination_class = pagination.PageNumberPagination
-    permission_classes = (AdminOrReadOnnly,)
+    permission_classes = (AdminOrReadOnnly)
 
 
 class TitleViewSet(viewsets.ModelViewSet):
