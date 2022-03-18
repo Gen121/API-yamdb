@@ -3,8 +3,6 @@ from django.contrib import admin
 from .models import Category, Comment, Genre, Review, Title, User
 
 
-admin.site.register(Comment)
-admin.site.register(Review)
 admin.site.register(User)
 
 
@@ -62,6 +60,6 @@ class ReviewAdmin(admin.ModelAdmin):
         'text',
         'title'
     )
-    search_fields = ('pub_date',)
-    list_filter = ('pub_date',)
-    empty_value_display = '-пусто-'
+    # search_fields = ('pub_date',)
+    # list_filter = ('pub_date',)
+    # empty_value_display = '-пусто-'
