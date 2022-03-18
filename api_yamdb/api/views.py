@@ -46,7 +46,6 @@ class TitleViewSet(viewsets.ModelViewSet):
             genre=genre_list)
 
 
-
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
