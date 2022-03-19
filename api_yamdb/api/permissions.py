@@ -6,7 +6,7 @@ class AdminOrReadOnnly(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method not in permissions.SAFE_METHODS:
             try:
-                return 'ADMIN' == request.user.role
+                return 'admin' == request.user.role
             except AttributeError:
                 return False
 
@@ -14,9 +14,8 @@ class AdminOrReadOnnly(permissions.BasePermission):
 
 
 class Admin(permissions.BasePermission):
-
     def has_permission(self, request, view):
         try:
-            return 'ADMIN' == request.user.role
+            return request.user.is_superuser or 'admin' == request.user.role
         except AttributeError:
             return False
