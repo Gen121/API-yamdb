@@ -33,16 +33,17 @@ class Title(models.Model):
 
 class User(AbstractUser):
     ROLE_CHOICES = [
-        ('USER', 'user'),
-        ('MODERATOR', 'moderator'),
-        ('ADMIN', 'admin'),
+        ('user', 'user'),
+        ('moderator', 'moderator'),
+        ('admin', 'admin'),
     ]
     email = models.EmailField(max_length=254, unique=True,
                               blank=False, null=False)
     first_name = models.CharField(max_length=150, blank=True)
     bio = models.TextField(blank=True)
     role = models.CharField(max_length=15, choices=ROLE_CHOICES,
-                            default='USER', verbose_name='role')
+                            default='user', verbose_name='role')
+    confirmation_code = models.CharField(max_length=6)
 
 
 class Review(models.Model):
