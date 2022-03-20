@@ -58,6 +58,15 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
 
 
+class UserMeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        fields = ('username', 'email', 'first_name',
+                  'last_name', 'bio', 'role',)
+        model = User
+        read_only_fields = ('role',)
+
+
 class SendCodeSerializer(serializers.Serializer):
     username = serializers.CharField(required=True)
     email = serializers.EmailField(required=True)
