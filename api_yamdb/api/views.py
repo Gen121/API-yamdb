@@ -23,8 +23,9 @@ class CategoryViewSet(mixins.CreateModelMixin,
     queryset = Category.objects.all()
     lookup_field = 'slug'
     pagination_class = pagination.PageNumberPagination
-    permission_classes = (AdminOrReadOnnly)
-
+    permission_classes = (AdminOrReadOnnly, )
+    filter_backends = (filters.SearchFilter, )
+    search_fields = ('name', )
 
 class GenreViewSet(mixins.CreateModelMixin,
                    mixins.ListModelMixin,
@@ -34,14 +35,16 @@ class GenreViewSet(mixins.CreateModelMixin,
     queryset = Genre.objects.all()
     lookup_field = 'slug'
     pagination_class = pagination.PageNumberPagination
-    permission_classes = (AdminOrReadOnnly)
+    permission_classes = (AdminOrReadOnnly, )
+    filter_backends = (filters.SearchFilter, )
+    search_fields = ('name', )
 
 
 class TitleViewSet(viewsets.ModelViewSet):
     serializer_class = TitleSerializer
     queryset = Title.objects.all()
     pagination_class = pagination.PageNumberPagination
-    permission_classes = (AdminOrReadOnnly,)
+    permission_classes = (AdminOrReadOnnly, )
 
     def perform_create(self, serializer):
         category_data = self.request.data['category']
