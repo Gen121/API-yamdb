@@ -24,6 +24,8 @@ class CategoryViewSet(mixins.CreateModelMixin,
     lookup_field = 'slug'
     pagination_class = pagination.PageNumberPagination
     permission_classes = (AdminOrReadOnnly, )
+    filter_backends = (filters.SearchFilter, )
+    search_fields = ('name', )
 
 
 class GenreViewSet(mixins.CreateModelMixin,
@@ -35,6 +37,8 @@ class GenreViewSet(mixins.CreateModelMixin,
     lookup_field = 'slug'
     pagination_class = pagination.PageNumberPagination
     permission_classes = (AdminOrReadOnnly, )
+    filter_backends = (filters.SearchFilter, )
+    search_fields = ('name', )
 
 
 class TitleViewSet(viewsets.ModelViewSet):
