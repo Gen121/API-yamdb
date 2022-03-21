@@ -12,12 +12,11 @@ class TitleAdmin(admin.ModelAdmin):
         'pk',
         'name',
         'year',
-        'rating',
         'description',
         'category',
     )
     search_fields = ('name', 'description')
-    list_filter = ('rating', 'year')
+    list_filter = ('year', )
     empty_value_display = '-пусто-'
 
 

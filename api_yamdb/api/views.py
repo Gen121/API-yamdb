@@ -1,3 +1,5 @@
+import django_filters
+from django_filters.rest_framework import DjangoFilterBackend, FilterSet
 from django.shortcuts import get_object_or_404
 from django.core.mail import send_mail
 from rest_framework import filters, pagination, permissions, status, viewsets, mixins
@@ -22,8 +24,7 @@ class CategoryViewSet(mixins.CreateModelMixin,
     serializer_class = CategorySerializer
     queryset = Category.objects.all()
     lookup_field = 'slug'
-    pagination_class = pagination.PageNumberPagination
-    permission_classes = (AdminOrReadOnnly, )
+    # permission_classes = (AdminOrReadOnnly, )
     filter_backends = (filters.SearchFilter, )
     search_fields = ('name', )
 
@@ -35,27 +36,42 @@ class GenreViewSet(mixins.CreateModelMixin,
     serializer_class = GenreSerializer
     queryset = Genre.objects.all()
     lookup_field = 'slug'
-    pagination_class = pagination.PageNumberPagination
-    permission_classes = (AdminOrReadOnnly, )
+    # permission_classes = (AdminOrReadOnnly, )
     filter_backends = (filters.SearchFilter, )
     search_fields = ('name', )
+
+
+class TitleFilter(FilterSet):
+    genre = django_filters.CharFilter(field_name='genre__slug')
+    category = django_filters.CharFilter(field_name='category__slug')
+    year = django_filters.NumberFilter(field_name='year')
+    name = django_filters.CharFilter(field_name='name',
+                                     lookup_expr='icontains')
+
+    class Meta:
+        model = Title
+        fields = ('name', 'year', 'genre', 'category')
 
 
 class TitleViewSet(viewsets.ModelViewSet):
     serializer_class = TitleSerializer
     queryset = Title.objects.all()
-    pagination_class = pagination.PageNumberPagination
-    permission_classes = (AdminOrReadOnnly, )
+    # permission_classes = (AdminOrReadOnnly, )
+    filter_backends = (DjangoFilterBackend, )
+    filterset_class = TitleFilter
 
-    def perform_create(self, serializer):
-        category_data = self.request.data['category']
-        category = get_object_or_404(Category, slug=category_data)
-        genre_data = self.request.data['genre']
-        genre_list = [get_object_or_404(Genre, slug=i) for i in genre_data]
+    def get_serializer_class(self):
+        if request.me
+        return 
 
-        serializer.save(
-            category=category,
-            genre=genre_list)
+    # def perform_create(self, serializer):
+    #     category_data = self.request.data['category']
+    #     genre_data = self.request.data['genre']
+    #     genre_data_list = genre_data if type(genre_data) == list else [genre_data]
+
+    #     serializer.save(
+    #         category=category_data,
+    #         genre=genre_data_list)
 
 
 class UserViewSet(viewsets.ModelViewSet):
