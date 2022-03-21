@@ -13,7 +13,8 @@ import random
 from reviews.models import Category, Genre, Title, User
 from .serializers import (CategorySerializer, GenreSerializer,
                           SendCodeSerializer, SendTokenSerializer,
-                          TitleSerializer, UserMeSerializer, UserSerializer)
+                          TitleEditSerializer, TitleSerializer,
+                          UserMeSerializer, UserSerializer, )
 from .permissions import Admin, AdminOrReadOnnly
 
 
@@ -61,8 +62,10 @@ class TitleViewSet(viewsets.ModelViewSet):
     filterset_class = TitleFilter
 
     def get_serializer_class(self):
-        if request.me
-        return 
+        if self.request.method in ('POST', 'PATCH'):
+            return TitleEditSerializer
+        else:
+            return TitleSerializer
 
     # def perform_create(self, serializer):
     #     category_data = self.request.data['category']
