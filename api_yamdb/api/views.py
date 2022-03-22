@@ -150,7 +150,7 @@ def send_token(request):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = (AdminModeratorAuthorPermission,)
+    #permission_classes = (AdminModeratorAuthorPermission,)
 
     def get_queryset(self):
         review = get_object_or_404(
@@ -167,7 +167,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = (AdminModeratorAuthorPermission,)
+    #permission_classes = (AdminModeratorAuthorPermission,)
 
     def get_queryset(self):
         title = get_object_or_404(
