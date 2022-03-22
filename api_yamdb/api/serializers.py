@@ -102,3 +102,11 @@ class SendCodeSerializer(serializers.Serializer):
 class SendTokenSerializer(serializers.Serializer):
     username = serializers.CharField(required=True)
     confirmation_code = serializers.CharField(required=True)
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    pass
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    pass
