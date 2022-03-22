@@ -1,5 +1,6 @@
 import datetime as dt
 
+from django.db.models import Avg
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
@@ -32,46 +33,9 @@ class TitleSerializer(serializers.ModelSerializer):
 
     def get_rating(self, obj):
         try:
-            return obj.reviews.aggregate(Avg('score'))['score__avg']
+            return int(obj.reviews.aggregate(Avg('score'))['score__avg'] + 0.5)
         except:
-            return 0
-
-    # def validate_year(self, value):
-    #     now_year = dt.date.today().year
-    #     if now_year < value:
-    #         raise serializers.ValidationError('Ошибка в годе произведения')
-    #     return value
-
-    # def validate_category(self, value):
-    #     if type(value) != str:
-    #         raise serializers.ValidationError(
-    #             'Категория дожна быть передана в виде строки')
-    #     if value not in Category.objects.values_list('slug', flat=True):
-    #         raise serializers.ValidationError(
-    #             f'Категории <{value}>, нет в базе данных.')
-    #     return value
-
-    # def validate_genre(self, value):
-    #     if type(value) != list:
-    #         raise serializers.ValidationError(
-    #             'Жанры дожны быть переданы в виде массива [<genre_1>,'
-    #             '<genre_2>, ... <genre_n>]')
-    #     for genre in value:
-    #         if genre not in Genre.objects.values_list('slug', flat=True):
-    #             raise serializers.ValidationError(
-    #                 f'Жанр <{genre}>, нет в базе данных.')
-    #     return value
-
-    # def create(self, validated_data):
-    #     genres = validated_data.pop('genre')
-    #     category = validated_data.pop('category')
-    #     category = Category.objects.get(slug=category)
-    #     title = Title.objects.create(**validated_data, category=category)
-    #     genre_list = [Genre.objects.get(slug=i) for i in genres]
-    #     for genre in genre_list:
-    #         GenreTitle.objects.create(
-    #             genre=genre, title=title)
-    #     return title
+            return None
 
 
 class TitleEditSerializer(TitleSerializer):
@@ -99,6 +63,10 @@ class TitleEditSerializer(TitleSerializer):
             GenreTitle.objects.create(
                 genre=genre, title=title)
         return title
+
+    def to_representation(self, instance):
+        serializer = TitleSerializer(instance)
+        return serializer.data
 
 
 class UserSerializer(serializers.ModelSerializer):
