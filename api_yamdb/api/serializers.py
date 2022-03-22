@@ -1,6 +1,7 @@
 import datetime as dt
 
 from rest_framework import serializers
+from rest_framework.validators import UniqueValidator
 
 from reviews.models import Category, Genre, GenreTitle, Title, User
 
@@ -118,8 +119,16 @@ class UserMeSerializer(serializers.ModelSerializer):
 
 
 class SendCodeSerializer(serializers.Serializer):
-    username = serializers.CharField(required=True)
-    email = serializers.EmailField(required=True)
+    username = serializers.CharField(
+        required=True,
+        validators=[UniqueValidator(
+            queryset=User.objects.all(),
+            message='Пользователь с таким именем уже зарегистрирован')])
+    email = serializers.EmailField(
+        required=True,
+        validators=[UniqueValidator(
+            queryset=User.objects.all(),
+            message='Почтовый адрес уже зарегистрирован')])
 
 
 class SendTokenSerializer(serializers.Serializer):

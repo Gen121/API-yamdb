@@ -101,7 +101,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
 def yamdb_send_mail(confirmation_code, email):
-    send_mail(
+    return send_mail(
         subject='Ваш код подтверждения на yambd.com',
         message=f'Ваш код подтверждения на yambd.com: {confirmation_code}',
         from_email='registration@yambd.com',
@@ -119,21 +119,20 @@ def send_code(request):
         return Response(message, status=status.HTTP_400_BAD_REQUEST)
     if serializer.is_valid():
         confirmation_code = str(random.randrange(1, 999999))
-        user = User.objects.filter(username=username).exists()
-        mail = User.objects.filter(email=email).exists()
-        if not user and not mail:
-            User.objects.create(username=username, email=email)
+        user = User.objects.filter(username=username, email=email).exists()
+        if not user:
+            User.objects.create(
+                username=username,
+                email=email, confirmation_code=confirmation_code)
             yamdb_send_mail(confirmation_code, email)
             message = {'email': email, 'username': username}
             return Response(message, status=status.HTTP_200_OK)
-        if user and mail:
-            User.objects.filter(username=username).update(
-                confirmation_code=confirmation_code
-            )
-            yamdb_send_mail(confirmation_code, email)
-            message = {'email': email, 'username': username}
-            return Response(message, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        User.objects.filter(email=email).update(
+            confirmation_code=confirmation_code
+        )
+        yamdb_send_mail(confirmation_code, email)
+        message = {'email': email, 'username': username}
+        return Response(message, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
