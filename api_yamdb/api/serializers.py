@@ -4,7 +4,8 @@ from django.db.models import Avg
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
-from reviews.models import Category, Genre, GenreTitle, Title, User
+from reviews.models import (Category, Comment, Genre, GenreTitle, Review,
+                            Title, User)
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -105,8 +106,14 @@ class SendTokenSerializer(serializers.Serializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    pass
+
+    class Meta:
+        model = Comment
+        fields = 'id', 'text', 'author', 'score', 'pub_date'
 
 
 class ReviewSerializer(serializers.ModelSerializer):
-    pass
+
+    class Meta:
+        model = Review
+        fields = 'id', 'text', 'author', 'pub_date'
