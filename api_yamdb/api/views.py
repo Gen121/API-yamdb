@@ -16,7 +16,7 @@ from .serializers import (CategorySerializer, GenreSerializer,
                           TitleEditSerializer, TitleSerializer,
                           UserMeSerializer, UserSerializer,
                           CommentSerializer, ReviewSerializer)
-from .permissions import Admin, AdminOrReadOnnly
+from .permissions import Admin, AdminOrReadOnnly, AdminModeratorAuthorPermission
 
 
 class CategoryViewSet(mixins.CreateModelMixin,
@@ -150,7 +150,7 @@ def send_token(request):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    #permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (IsAuthenticatedOrReadOnly, AdminModeratorAuthorPermission)
     #permission_classes = (AdminModeratorAuthorPermission,)IsAuthenticatedOrReadOnly
 
     def get_queryset(self):
@@ -168,7 +168,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (IsAuthenticatedOrReadOnly, AdminModeratorAuthorPermission)
     #permission_classes = (AdminModeratorAuthorPermission,)
 
     def get_queryset(self):
