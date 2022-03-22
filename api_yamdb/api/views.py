@@ -4,7 +4,7 @@ from django.shortcuts import get_object_or_404
 from django.core.mail import send_mail
 from rest_framework import filters, pagination, status, viewsets, mixins
 from rest_framework.decorators import action, api_view
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
@@ -150,7 +150,8 @@ def send_token(request):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    #permission_classes = (AdminModeratorAuthorPermission,)
+    #permission_classes = (IsAuthenticatedOrReadOnly,)
+    #permission_classes = (AdminModeratorAuthorPermission,)IsAuthenticatedOrReadOnly
 
     def get_queryset(self):
         review = get_object_or_404(
@@ -167,6 +168,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
+    permission_classes = (IsAuthenticatedOrReadOnly,)
     #permission_classes = (AdminModeratorAuthorPermission,)
 
     def get_queryset(self):
