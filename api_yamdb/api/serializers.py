@@ -106,6 +106,7 @@ class SendTokenSerializer(serializers.Serializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
+    #author = serializers.SlugRelatedField(slug_field='username')
 
     class Meta:
         model = Comment
@@ -113,6 +114,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class ReviewSerializer(serializers.ModelSerializer):
+    #author = serializers.SlugRelatedField(slug_field='username')
 
     class Meta:
         model = Review

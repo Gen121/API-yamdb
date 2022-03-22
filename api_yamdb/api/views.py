@@ -150,7 +150,7 @@ def send_token(request):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly, AdminModeratorAuthorPermission)
+    permission_classes = (AdminModeratorAuthorPermission, )
     #permission_classes = (AdminModeratorAuthorPermission,)IsAuthenticatedOrReadOnly
 
     def get_queryset(self):
