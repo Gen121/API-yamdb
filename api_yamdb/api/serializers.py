@@ -3,7 +3,6 @@ import datetime as dt
 from django.db.models import Avg
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
-
 from reviews.models import (Category, Comment, Genre, GenreTitle, Review,
                             Title, User)
 
@@ -35,7 +34,7 @@ class TitleSerializer(serializers.ModelSerializer):
     def get_rating(self, obj):
         try:
             return int(obj.reviews.aggregate(Avg('score'))['score__avg'] + 0.5)
-        except:
+        except Exception:
             return None
 
 
@@ -106,16 +105,24 @@ class SendTokenSerializer(serializers.Serializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    #author = serializers.SlugRelatedField(slug_field='username')
+    author = serializers.SlugRelatedField(
+        many=False,
+        read_only=True,
+        slug_field='username'
+    )
 
     class Meta:
         model = Comment
-        fields = ('id', 'text', 'author', 'score', 'pub_date', )
+        fields = ('id', 'text', 'author', 'pub_date',)
 
 
 class ReviewSerializer(serializers.ModelSerializer):
-    #author = serializers.SlugRelatedField(slug_field='username')
+    author = serializers.SlugRelatedField(
+        many=False,
+        read_only=True,
+        slug_field='username'
+    )
 
     class Meta:
         model = Review
-        fields = ('id', 'text', 'author', 'pub_date', )
+        fields = ('id', 'text', 'author', 'score', 'pub_date',)

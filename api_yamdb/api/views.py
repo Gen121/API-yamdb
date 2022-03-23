@@ -1,22 +1,24 @@
+import random
+
 import django_filters
-from django_filters.rest_framework import DjangoFilterBackend, FilterSet
-from django.shortcuts import get_object_or_404
 from django.core.mail import send_mail
-from rest_framework import filters, pagination, status, viewsets, mixins
+from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend, FilterSet
+from rest_framework import filters, mixins, pagination, status, viewsets
 from rest_framework.decorators import action, api_view
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.exceptions import ParseError
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
-import random
-
-from reviews.models import Category, Genre, Title, User, Review
-from .serializers import (CategorySerializer, GenreSerializer,
+from reviews.models import Category, Genre, Review, Title, User
+from .permissions import (Admin, AdminModeratorAuthorPermission,
+                          AdminOrReadOnnly)
+from .serializers import (CategorySerializer, CommentSerializer,
+                          GenreSerializer, ReviewSerializer,
                           SendCodeSerializer, SendTokenSerializer,
                           TitleEditSerializer, TitleSerializer,
-                          UserMeSerializer, UserSerializer,
-                          CommentSerializer, ReviewSerializer)
-from .permissions import Admin, AdminOrReadOnnly, AdminModeratorAuthorPermission
+                          UserMeSerializer, UserSerializer)
 
 
 class CategoryViewSet(mixins.CreateModelMixin,
@@ -151,7 +153,6 @@ def send_token(request):
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = (AdminModeratorAuthorPermission, )
-    #permission_classes = (AdminModeratorAuthorPermission,)IsAuthenticatedOrReadOnly
 
     def get_queryset(self):
         review = get_object_or_404(
@@ -168,8 +169,8 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly, AdminModeratorAuthorPermission)
-    #permission_classes = (AdminModeratorAuthorPermission,)
+    permission_classes = (AdminModeratorAuthorPermission, )
+    pagination_class = pagination.PageNumberPagination
 
     def get_queryset(self):
         title = get_object_or_404(
@@ -181,4 +182,8 @@ class ReviewViewSet(viewsets.ModelViewSet):
         title = get_object_or_404(
             Title,
             id=self.kwargs.get('title_id'))
+        review = Review.objects.filter(
+            title=title, author=self.request.user).exists()
+        if review:
+            raise ParseError
         serializer.save(author=self.request.user, title=title)
