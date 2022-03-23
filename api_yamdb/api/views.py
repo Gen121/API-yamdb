@@ -17,8 +17,8 @@ from .permissions import (Admin, AdminModeratorAuthorPermission,
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewSerializer,
                           SendCodeSerializer, SendTokenSerializer,
-                          TitleEditSerializer, TitleSerializer,
-                          UserMeSerializer, UserSerializer)
+                          TitleEditSerializer, UserMeSerializer,
+                          UserSerializer)
 
 
 class CategoryViewSet(mixins.CreateModelMixin,
@@ -59,18 +59,10 @@ class TitleFilter(FilterSet):
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
+    serializer_class = TitleEditSerializer
     permission_classes = (AdminOrReadOnnly, )
     filter_backends = (DjangoFilterBackend, )
     filterset_class = TitleFilter
-
-    def get_object(self):
-        return get_object_or_404(Title, pk=self.kwargs.get('pk'))
-
-    def get_serializer_class(self):
-        if self.action in ('create', 'partial_update', 'update'):
-            return TitleEditSerializer
-        else:
-            return TitleSerializer
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -173,17 +165,17 @@ class ReviewViewSet(viewsets.ModelViewSet):
     pagination_class = pagination.PageNumberPagination
 
     def get_queryset(self):
-        title = get_object_or_404(
-            Title,
-            id=self.kwargs.get('title_id'))
+        title = self.get_title()
         return title.reviews.all()
 
     def perform_create(self, serializer):
-        title = get_object_or_404(
-            Title,
-            id=self.kwargs.get('title_id'))
+        title = self.get_title()
         review = Review.objects.filter(
             title=title, author=self.request.user).exists()
         if review:
-            raise ParseError
+            raise ParseError(
+                'Один автор, может оставить только один обзор на произведение')
         serializer.save(author=self.request.user, title=title)
+
+    def get_title(self):
+        return get_object_or_404(Title, id=self.kwargs.get('title_id'))
