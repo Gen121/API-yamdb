@@ -1,9 +1,8 @@
 import random
 
-import django_filters
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
-from django_filters.rest_framework import DjangoFilterBackend, FilterSet
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, pagination, status, viewsets
 from rest_framework.decorators import action, api_view
 from rest_framework.exceptions import ParseError
@@ -12,6 +11,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
 from reviews.models import Category, Genre, Review, Title, User
+from .filters import TitleFilter
 from .permissions import (Admin, AdminModeratorAuthorPermission,
                           AdminOrReadOnnly)
 from .serializers import (CategorySerializer, CommentSerializer,
@@ -21,43 +21,24 @@ from .serializers import (CategorySerializer, CommentSerializer,
                           UserSerializer)
 
 
-class CategoryViewSet(mixins.CreateModelMixin,
-                      mixins.ListModelMixin,
-                      mixins.DestroyModelMixin,
-                      viewsets.GenericViewSet,):
+class CreateListDestroyViewSet(mixins.CreateModelMixin,
+                               mixins.ListModelMixin,
+                               mixins.DestroyModelMixin,
+                               viewsets.GenericViewSet, ):
+    lookup_field = 'slug'
+    permission_classes = (AdminOrReadOnnly, )
+    filter_backends = (filters.SearchFilter, )
+    search_fields = ('name', )
+
+
+class CategoryViewSet(CreateListDestroyViewSet):
     serializer_class = CategorySerializer
     queryset = Category.objects.all()
-    lookup_field = 'slug'
-    permission_classes = (AdminOrReadOnnly, )
-    filter_backends = (filters.SearchFilter, )
-    search_fields = ('name', )
 
 
-class GenreViewSet(mixins.CreateModelMixin,
-                   mixins.ListModelMixin,
-                   mixins.DestroyModelMixin,
-                   viewsets.GenericViewSet, ):
-# TODO:  Взгляните на эти два класса, сколько в них похожего
-# Стоит вынести все повторяющиеся моменты в отдельный родительский класс
-
+class GenreViewSet(CreateListDestroyViewSet):
     serializer_class = GenreSerializer
     queryset = Genre.objects.all()
-    lookup_field = 'slug'
-    permission_classes = (AdminOrReadOnnly, )
-    filter_backends = (filters.SearchFilter, )
-    search_fields = ('name', )
-
-
-class TitleFilter(FilterSet):  # TODO:  Фильтры нужно вынести в filters.py
-    genre = django_filters.CharFilter(field_name='genre__slug')
-    category = django_filters.CharFilter(field_name='category__slug')
-    year = django_filters.NumberFilter(field_name='year')
-    name = django_filters.CharFilter(field_name='name',
-                                     lookup_expr='icontains')
-
-    class Meta:
-        model = Title
-        fields = ('name', 'year', 'genre', 'category')
 
 
 class TitleViewSet(viewsets.ModelViewSet):
