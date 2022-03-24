@@ -2,7 +2,7 @@ import datetime as dt
 
 from django.db.models import Avg
 from rest_framework import serializers
-from rest_framework.validators import UniqueValidator
+
 from reviews.models import (Category, Comment, Genre, GenreTitle, Review,  # TODO: Локальный импорт не отделён пустой строкой, isort иногда не понимает, что он локальный, потому что он начинается не с точки
                             Title, User)
 
@@ -87,9 +87,20 @@ class UserMeSerializer(serializers.ModelSerializer):
 
 
 class SendCodeSerializer(serializers.Serializer):
-    username = serializers.CharField(
-        required=True,
-        validators=[UniqueValidator(
+    username = serializers.CharField(required=True)
+    email = serializers.EmailField(required=True)
+
+    def validate_username(self, value):
+        if value == 'me':
+            raise serializers.ValidationError(
+                'Нельзя создать пользователя с username = "me"')
+        return value
+
+
+# class SendCodeSerializer(serializers.Serializer):
+#     username = serializers.CharField(
+#         required=True,
+#         validators=[UniqueValidator(
             # TODO: Не очень хорошее решение.
             # Представьте ситуацию:
             # 1) Пользователь отправил мейл и юзернейм
@@ -98,13 +109,13 @@ class SendCodeSerializer(serializers.Serializer):
             # 4) Пытается отправить ещё раз - а сервер ему ничего не возвращает, потому что такой емейл уже есть в базе
             # Нужно это обдумать и решить, валидацию на это в сериализаторе стоит удалить.
             # В качестве родительского класса нужно брать обычный сериализатор, во вьюхе использовать get_or_create
-            queryset=User.objects.all(),
-            message='Пользователь с таким именем уже зарегистрирован')])
-    email = serializers.EmailField(
-        required=True,
-        validators=[UniqueValidator(
-            queryset=User.objects.all(),
-            message='Почтовый адрес уже зарегистрирован')])
+    #         queryset=User.objects.all(),
+    #         message='Пользователь с таким именем уже зарегистрирован')])
+    # email = serializers.EmailField(
+    #     required=True,
+    #     validators=[UniqueValidator(
+    #         queryset=User.objects.all(),
+    #         message='Почтовый адрес уже зарегистрирован')])
 
 
 class SendTokenSerializer(serializers.Serializer):

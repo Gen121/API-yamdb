@@ -44,11 +44,12 @@ class User(AbstractUser):
         ('moderator', 'moderator'),
         ('admin', 'admin'),
     ]
-    email = models.EmailField(max_length=254, unique=True,
-                              blank=False, null=False)  # TODO:  INblank и null по умолчанию False
-    first_name = models.CharField(max_length=150, blank=True)  # TODO: Не хватает явного указания last_name
+    email = models.EmailField(max_length=254, unique=True)
+    first_name = models.CharField(max_length=150, blank=True)
+    last_name = models.CharField(max_length=150, blank=True)
     bio = models.TextField(blank=True)
-    role = models.CharField(max_length=15, choices=ROLE_CHOICES,  # TODO:  Длину лучше вычислить узнав максимальную длину из ROLE_CHOICES
+    role = models.CharField(max_length=len(max(ROLE_CHOICES)),
+                            choices=ROLE_CHOICES,
                             default='user', verbose_name='role')
     confirmation_code = models.CharField(max_length=6)
 
