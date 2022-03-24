@@ -3,7 +3,7 @@ from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
-from django_filters.rest_framework import DjangoFilterBackend, FilterSet
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, pagination, status, viewsets
 from rest_framework.decorators import action, api_view
 from rest_framework.exceptions import ParseError
@@ -12,6 +12,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
 from reviews.models import Category, Genre, Review, Title, User
+from .filters import TitleFilter
 from .permissions import (Admin, AdminModeratorAuthorPermission,
                           AdminOrReadOnnly)
 from .serializers import (CategorySerializer, CommentSerializer,
@@ -21,43 +22,24 @@ from .serializers import (CategorySerializer, CommentSerializer,
                           UserSerializer)
 
 
-class CategoryViewSet(mixins.CreateModelMixin,
-                      mixins.ListModelMixin,
-                      mixins.DestroyModelMixin,
-                      viewsets.GenericViewSet,):
+class CreateListDestroyViewSet(mixins.CreateModelMixin,
+                               mixins.ListModelMixin,
+                               mixins.DestroyModelMixin,
+                               viewsets.GenericViewSet, ):
+    lookup_field = 'slug'
+    permission_classes = (AdminOrReadOnnly, )
+    filter_backends = (filters.SearchFilter, )
+    search_fields = ('name', )
+
+
+class CategoryViewSet(CreateListDestroyViewSet):
     serializer_class = CategorySerializer
     queryset = Category.objects.all()
-    lookup_field = 'slug'
-    permission_classes = (AdminOrReadOnnly, )
-    filter_backends = (filters.SearchFilter, )
-    search_fields = ('name', )
 
 
-class GenreViewSet(mixins.CreateModelMixin,
-                   mixins.ListModelMixin,
-                   mixins.DestroyModelMixin,
-                   viewsets.GenericViewSet, ):
-# TODO:  Взгляните на эти два класса, сколько в них похожего
-# Стоит вынести все повторяющиеся моменты в отдельный родительский класс
-
+class GenreViewSet(CreateListDestroyViewSet):
     serializer_class = GenreSerializer
     queryset = Genre.objects.all()
-    lookup_field = 'slug'
-    permission_classes = (AdminOrReadOnnly, )
-    filter_backends = (filters.SearchFilter, )
-    search_fields = ('name', )
-
-
-class TitleFilter(FilterSet):  # TODO:  Фильтры нужно вынести в filters.py
-    genre = django_filters.CharFilter(field_name='genre__slug')
-    category = django_filters.CharFilter(field_name='category__slug')
-    year = django_filters.NumberFilter(field_name='year')
-    name = django_filters.CharFilter(field_name='name',
-                                     lookup_expr='icontains')
-
-    class Meta:
-        model = Title
-        fields = ('name', 'year', 'genre', 'category')
 
 
 class TitleViewSet(viewsets.ModelViewSet):
@@ -137,35 +119,28 @@ class CommentViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         review = get_object_or_404(
             Review,
-            id=self.kwargs.get('review_id'))  # TODO:
-        # Здесь и ниже необходимо проверить,
-        # что ревью на верный тайтл. Это можно сделать с помощью указания
-        # дополнительного параметра в выборке title__id
+            id=self.kwargs.get('review_id'),
+            title=self.kwargs.get('title_id'))
         return review.comments.all()
 
     def perform_create(self, serializer):
         review = get_object_or_404(
             Review,
-            id=self.kwargs.get('review_id'))
+            id=self.kwargs.get('review_id'),
+            title=self.kwargs.get('title_id'))
         serializer.save(author=self.request.user, review=review)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = (AdminModeratorAuthorPermission, )
-    pagination_class = pagination.PageNumberPagination
-
+    permission_classes = (AdminModeratorAuthorPermission,)
+    
     def get_queryset(self):
-        title = self.get_title()
+        title = get_object_or_404(Title, id=self.kwargs.get("title_id"))
         return title.reviews.all()
-
+    
     def perform_create(self, serializer):
-        title = self.get_title()
-        review = Review.objects.filter(
-            title=title, author=self.request.user).exists()
-        if review:  # TODO: Нужно вынести логику валидации в сериализатор
-            raise ParseError(
-                'Один автор, может оставить только один обзор на произведение')
+        title = get_object_or_404(Title, id=self.kwargs.get("title_id"))
         serializer.save(author=self.request.user, title=title)
 
     def get_title(self):

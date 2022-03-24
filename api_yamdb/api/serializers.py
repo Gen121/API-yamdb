@@ -1,10 +1,12 @@
 import datetime as dt
 
 from django.db.models import Avg
+from django.shortcuts import get_object_or_404
+from django.core.exceptions import ValidationError
 from rest_framework import serializers
+from rest_framework.validators import UniqueValidator
 
-from reviews.models import (Category, Comment, Genre, GenreTitle, Review,
-                            Title, User)
+from reviews.models import Category, Comment, Genre, Review, Title, User
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -52,17 +54,15 @@ class TitleEditSerializer(TitleSerializer):
 
     def validate_year(self, value):
         now_year = dt.date.today().year
-        if now_year < value:  # TODO:  Снизу тоже хорошо бы ограничить :)
-            raise serializers.ValidationError('Ошибка в годе произведения')
+        quaternary_geological_period = -2588000
+        if now_year < value:
+            raise serializers.ValidationError(
+                'Невозможна публикация будущих произведений')
+        if value < quaternary_geological_period:
+            raise serializers.ValidationError(
+                ' Ограничение для прошлого - антропоген (2,588 млн. лет назад)'
+            )
         return value
-
-    def create(self, validated_data):  # TODO:  Лишний метод
-        genres = validated_data.pop('genre')
-        title = Title.objects.create(**validated_data)
-        for genre in genres:
-            GenreTitle.objects.create(
-                genre=genre, title=title)
-        return title
 
     def to_representation(self, instance):  # TODO:  Лишний метод
         serializer = TitleSerializer(instance)
@@ -134,6 +134,18 @@ class ReviewSerializer(serializers.ModelSerializer):
         slug_field='username'
     )
 
+    def validate(self, data):
+        request = self.context['request']
+        author = request.user
+        title_id = self.context.get('view').kwargs.get('title_id')
+        title = get_object_or_404(Title, pk=title_id)
+        if (
+            request.method == "POST"
+            and Review.objects.filter(title=title, author=author).exists()
+        ):
+            raise ValidationError('Один автор, может оставить только один обзор на произведение')
+        return data
+    
     class Meta:
         model = Review
         fields = ('id', 'text', 'author', 'score', 'pub_date',)

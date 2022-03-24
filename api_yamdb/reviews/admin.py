@@ -59,6 +59,3 @@ class ReviewAdmin(admin.ModelAdmin):
         'text',
         'title'
     )
-    # search_fields = ('pub_date',)  # TODO:  Стоит подчистить
-    # list_filter = ('pub_date',)
-    # empty_value_display = '-пусто-'
