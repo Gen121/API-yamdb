@@ -6,8 +6,8 @@ class AdminOrReadOnnly(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method not in permissions.SAFE_METHODS:
             try:
-                return 'admin' == request.user.role
-            except AttributeError:
+                return 'admin' == request.user.role  # TODO:  Старайтесь никогда не сравнивать роль со строкой, это очень небезопасно и ненадёжно.
+            except AttributeError:                   #        Для этого можно сделать property в классе юзера, которые бы отвечали, админ ли это и т.д
                 return False
 
         return True

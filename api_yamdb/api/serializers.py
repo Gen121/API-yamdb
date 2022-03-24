@@ -3,7 +3,7 @@ import datetime as dt
 from django.db.models import Avg
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
-from reviews.models import (Category, Comment, Genre, GenreTitle, Review,
+from reviews.models import (Category, Comment, Genre, GenreTitle, Review,  # TODO: Локальный импорт не отделён пустой строкой, isort иногда не понимает, что он локальный, потому что он начинается не с точки
                             Title, User)
 
 
@@ -33,7 +33,7 @@ class TitleSerializer(serializers.ModelSerializer):
 
     def get_rating(self, obj):
         try:
-            return int(obj.reviews.aggregate(Avg('score'))['score__avg'] + 0.5)
+            return int(obj.reviews.aggregate(Avg('score'))['score__avg'] + 0.5)  # TODO: Не самое лучшее решение, будет пересчитываться на каждый запрос, покажу во вьюхе
         except Exception:
             return None
 
@@ -52,11 +52,11 @@ class TitleEditSerializer(TitleSerializer):
 
     def validate_year(self, value):
         now_year = dt.date.today().year
-        if now_year < value:
+        if now_year < value:  # TODO:  Снизу тоже хорошо бы ограничить :)
             raise serializers.ValidationError('Ошибка в годе произведения')
         return value
 
-    def create(self, validated_data):
+    def create(self, validated_data):  # TODO:  Лишний метод
         genres = validated_data.pop('genre')
         title = Title.objects.create(**validated_data)
         for genre in genres:
@@ -64,7 +64,7 @@ class TitleEditSerializer(TitleSerializer):
                 genre=genre, title=title)
         return title
 
-    def to_representation(self, instance):
+    def to_representation(self, instance):  # TODO:  Лишний метод
         serializer = TitleSerializer(instance)
         return serializer.data
 
@@ -90,6 +90,14 @@ class SendCodeSerializer(serializers.Serializer):
     username = serializers.CharField(
         required=True,
         validators=[UniqueValidator(
+            # TODO: Не очень хорошее решение.
+            # Представьте ситуацию:
+            # 1) Пользователь отправил мейл и юзернейм
+            # 2) Система отдала ему письмо с токеном и создала пользователя в базе с таким емейлом и юзернеймом
+            # 3) Пользователь потерял письмо
+            # 4) Пытается отправить ещё раз - а сервер ему ничего не возвращает, потому что такой емейл уже есть в базе
+            # Нужно это обдумать и решить, валидацию на это в сериализаторе стоит удалить.
+            # В качестве родительского класса нужно брать обычный сериализатор, во вьюхе использовать get_or_create
             queryset=User.objects.all(),
             message='Пользователь с таким именем уже зарегистрирован')])
     email = serializers.EmailField(
