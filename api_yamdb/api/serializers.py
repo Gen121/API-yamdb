@@ -3,8 +3,8 @@ import datetime as dt
 from django.db.models import Avg
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
-from reviews.models import (Category, Comment, Genre, GenreTitle, Review,  # TODO: Локальный импорт не отделён пустой строкой, isort иногда не понимает, что он локальный, потому что он начинается не с точки
-                            Title, User)
+
+from reviews.models import Category, Comment, Genre, Review, Title, User
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -52,17 +52,15 @@ class TitleEditSerializer(TitleSerializer):
 
     def validate_year(self, value):
         now_year = dt.date.today().year
-        if now_year < value:  # TODO:  Снизу тоже хорошо бы ограничить :)
-            raise serializers.ValidationError('Ошибка в годе произведения')
+        quaternary_geological_period = -2588000
+        if now_year < value:
+            raise serializers.ValidationError(
+                'Невозможна публикация будущих произведений')
+        if value < quaternary_geological_period:
+            raise serializers.ValidationError(
+                ' Ограничение для прошлого - антропоген (2,588 млн. лет назад)'
+            )
         return value
-
-    def create(self, validated_data):  # TODO:  Лишний метод
-        genres = validated_data.pop('genre')
-        title = Title.objects.create(**validated_data)
-        for genre in genres:
-            GenreTitle.objects.create(
-                genre=genre, title=title)
-        return title
 
     def to_representation(self, instance):  # TODO:  Лишний метод
         serializer = TitleSerializer(instance)
