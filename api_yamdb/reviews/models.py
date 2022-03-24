@@ -1,4 +1,3 @@
-from django.utils import timezone
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
@@ -6,7 +5,8 @@ from django.db import models
 
 class Category(models.Model):
     name = models.CharField(max_length=256)
-    slug = models.SlugField(max_length=50, unique=True)
+    slug = models.SlugField(max_length=50, unique=True)  # TODO: По ТЗ у слага есть регулярка, стоит указать
+# TODO: Всем моделям не помешает verbose_name и verbose_name_plural
 
 
 class Genre(models.Model):
@@ -16,8 +16,7 @@ class Genre(models.Model):
 
 class Title(models.Model):
     name = models.CharField(max_length=256)
-    year = models.IntegerField()
-    rating = models.IntegerField(null=True)
+    year = models.IntegerField()  # TODO: Стоит добавить валидацию
     description = models.TextField(
         blank=True)
     genre = models.ManyToManyField(
@@ -46,10 +45,10 @@ class User(AbstractUser):
         ('admin', 'admin'),
     ]
     email = models.EmailField(max_length=254, unique=True,
-                              blank=False, null=False)
-    first_name = models.CharField(max_length=150, blank=True)
+                              blank=False, null=False)  # TODO:  INblank и null по умолчанию False
+    first_name = models.CharField(max_length=150, blank=True)  # TODO: Не хватает явного указания last_name
     bio = models.TextField(blank=True)
-    role = models.CharField(max_length=15, choices=ROLE_CHOICES,
+    role = models.CharField(max_length=15, choices=ROLE_CHOICES,  # TODO:  Длину лучше вычислить узнав максимальную длину из ROLE_CHOICES
                             default='user', verbose_name='role')
     confirmation_code = models.CharField(max_length=6)
 
@@ -62,7 +61,7 @@ class Review(models.Model):
     )
     # или использовать TextField?
     text = models.CharField(
-        max_length=200,
+        max_length=200,  # TODO:  Не стоит надумывать длину полей, указывайте только то, что есть в ТЗ
         verbose_name='Текст отзыва'
     )
     author = models.ForeignKey(

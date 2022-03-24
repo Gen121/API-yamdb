@@ -12,12 +12,11 @@ class TitleAdmin(admin.ModelAdmin):
         'pk',
         'name',
         'year',
-        'rating',
         'description',
         'category',
     )
     search_fields = ('name', 'description')
-    list_filter = ('rating', 'year')
+    list_filter = ('year', )
     empty_value_display = '-пусто-'
 
 
@@ -60,6 +59,6 @@ class ReviewAdmin(admin.ModelAdmin):
         'text',
         'title'
     )
-    # search_fields = ('pub_date',)
+    # search_fields = ('pub_date',)  # TODO:  Стоит подчистить
     # list_filter = ('pub_date',)
     # empty_value_display = '-пусто-'
