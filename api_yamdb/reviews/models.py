@@ -1,7 +1,14 @@
+import datetime as dt
+
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
+
+QUATERNARY_GEOLOGICAL_PERIOD = -2588000
+TODAYS_YEAR = dt.date.today().year
+MAX_SCORE = 10
+MIN_SCORE = 1
 
 class Category(models.Model):
     name = models.CharField(max_length=256)
@@ -16,7 +23,10 @@ class Genre(models.Model):
 
 class Title(models.Model):
     name = models.CharField(max_length=256)
-    year = models.IntegerField()  # TODO: Стоит добавить валидацию
+    year = models.IntegerField(validators=(
+            MinValueValidator(QUATERNARY_GEOLOGICAL_PERIOD),
+            MaxValueValidator(TODAYS_YEAR)
+        ))
     description = models.TextField(
         blank=True)
     genre = models.ManyToManyField(
@@ -30,6 +40,8 @@ class Title(models.Model):
         blank=True,
         null=True, )
 
+def is_admin(self):
+    return self.role == 'admin'
 
 class GenreTitle(models.Model):
     genre = models.ForeignKey(Genre,
@@ -73,8 +85,8 @@ class Review(models.Model):
     score = models.IntegerField(
         verbose_name='Оценка',
         validators=(
-            MinValueValidator(1),
-            MaxValueValidator(10)
+            MinValueValidator(MIN_SCORE),
+            MaxValueValidator(MAX_SCORE)
         ),
         error_messages={'validators': 'Оценка должна быть от 1 до 10'}
     )
