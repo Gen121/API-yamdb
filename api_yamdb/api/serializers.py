@@ -4,7 +4,6 @@ from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ValidationError
 from rest_framework import serializers
-from rest_framework.validators import UniqueValidator
 
 from reviews.models import Category, Comment, Genre, Review, Title, User
 
@@ -145,7 +144,7 @@ class ReviewSerializer(serializers.ModelSerializer):
         ):
             raise ValidationError('Один автор, может оставить только один обзор на произведение')
         return data
-    
+
     class Meta:
         model = Review
         fields = ('id', 'text', 'author', 'score', 'pub_date',)
