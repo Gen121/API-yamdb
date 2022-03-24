@@ -59,9 +59,8 @@ class Review(models.Model):
         related_name='reviews',
         verbose_name='Произведение'
     )
-    # или использовать TextField?
-    text = models.CharField(
-        max_length=200,  # TODO:  Не стоит надумывать длину полей, указывайте только то, что есть в ТЗ
+    
+    text = models.TextField(
         verbose_name='Текст отзыва'
     )
     author = models.ForeignKey(

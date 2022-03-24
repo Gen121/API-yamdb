@@ -93,7 +93,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'ru-RU'
 
-TIME_ZONE = 'UTC'  # TODO:  Тут можно что-нибудь поближе указать :)
+TIME_ZONE = 'Europe/Moscow'
 
 USE_I18N = True
 

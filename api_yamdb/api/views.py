@@ -163,7 +163,8 @@ class CommentViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         review = get_object_or_404(
             Review,
-            id=self.kwargs.get('review_id'))  # TODO:
+            id=self.kwargs.get('review_id'),
+            title=self.kwargs.get('title_id'))  # TODO:
         # Здесь и ниже необходимо проверить,
         # что ревью на верный тайтл. Это можно сделать с помощью указания
         # дополнительного параметра в выборке title__id
@@ -172,26 +173,42 @@ class CommentViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         review = get_object_or_404(
             Review,
-            id=self.kwargs.get('review_id'))
+            id=self.kwargs.get('review_id'),
+            title=self.kwargs.get('title_id'))
         serializer.save(author=self.request.user, review=review)
 
 
+# class ReviewViewSet(viewsets.ModelViewSet):
+#     serializer_class = ReviewSerializer
+#     permission_classes = (AdminModeratorAuthorPermission, )
+#     pagination_class = pagination.PageNumberPagination
+
+#     def get_queryset(self):
+#         title = self.get_title()
+#         return title.reviews.all()
+
+#     def perform_create(self, serializer):
+#         title = self.get_title()
+#         review = Review.objects.filter(
+#             title=title, author=self.request.user).exists()
+#         if review:  # TODO: Нужно вынести логику валидации в сериализатор
+#             raise ParseError(
+#                 'Один автор, может оставить только один обзор на произведение')
+#         serializer.save(author=self.request.user, title=title)
+
+#     def get_title(self):
+#         return get_object_or_404(Title, id=self.kwargs.get('title_id'))
+
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = (AdminModeratorAuthorPermission, )
-    pagination_class = pagination.PageNumberPagination
-
+    permission_classes = (AdminModeratorAuthorPermission,)
+    
     def get_queryset(self):
-        title = self.get_title()
+        title = get_object_or_404(Title, id=self.kwargs.get("title_id"))
         return title.reviews.all()
-
+    
     def perform_create(self, serializer):
-        title = self.get_title()
-        review = Review.objects.filter(
-            title=title, author=self.request.user).exists()
-        if review:  # TODO: Нужно вынести логику валидации в сериализатор
-            raise ParseError(
-                'Один автор, может оставить только один обзор на произведение')
+        title = get_object_or_404(Title, id=self.kwargs.get("title_id"))
         serializer.save(author=self.request.user, title=title)
 
     def get_title(self):
