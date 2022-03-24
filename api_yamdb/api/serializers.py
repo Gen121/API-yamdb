@@ -3,7 +3,7 @@ import datetime as dt
 from django.db.models import Avg
 from rest_framework import serializers
 
-from reviews.models import (Category, Comment, Genre, GenreTitle, Review,  # TODO: Локальный импорт не отделён пустой строкой, isort иногда не понимает, что он локальный, потому что он начинается не с точки
+from reviews.models import (Category, Comment, Genre, GenreTitle, Review,
                             Title, User)
 
 
@@ -90,32 +90,24 @@ class SendCodeSerializer(serializers.Serializer):
     username = serializers.CharField(required=True)
     email = serializers.EmailField(required=True)
 
+    def validate(self, data):
+        incomming_user = data['username']
+        incomming_mail = data['email']
+        check_user = User.objects.filter(username=incomming_user)
+        check_mail = User.objects.filter(email=incomming_mail)
+        if check_user and not check_mail:
+            raise serializers.ValidationError(
+                'Пользователь с таким именем существует')
+        if check_mail and not check_user:
+            raise serializers.ValidationError(
+                'Почтовый адрес уже существует')
+        return data
+
     def validate_username(self, value):
         if value == 'me':
             raise serializers.ValidationError(
                 'Нельзя создать пользователя с username = "me"')
         return value
-
-
-# class SendCodeSerializer(serializers.Serializer):
-#     username = serializers.CharField(
-#         required=True,
-#         validators=[UniqueValidator(
-            # TODO: Не очень хорошее решение.
-            # Представьте ситуацию:
-            # 1) Пользователь отправил мейл и юзернейм
-            # 2) Система отдала ему письмо с токеном и создала пользователя в базе с таким емейлом и юзернеймом
-            # 3) Пользователь потерял письмо
-            # 4) Пытается отправить ещё раз - а сервер ему ничего не возвращает, потому что такой емейл уже есть в базе
-            # Нужно это обдумать и решить, валидацию на это в сериализаторе стоит удалить.
-            # В качестве родительского класса нужно брать обычный сериализатор, во вьюхе использовать get_or_create
-    #         queryset=User.objects.all(),
-    #         message='Пользователь с таким именем уже зарегистрирован')])
-    # email = serializers.EmailField(
-    #     required=True,
-    #     validators=[UniqueValidator(
-    #         queryset=User.objects.all(),
-    #         message='Почтовый адрес уже зарегистрирован')])
 
 
 class SendTokenSerializer(serializers.Serializer):

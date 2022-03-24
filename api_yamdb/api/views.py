@@ -109,18 +109,8 @@ def send_code(request):
     serializer.is_valid(raise_exception=True)
     username = request.data.get('username')
     email = request.data.get('email')
-    user, created = User.objects.get_or_create(username=username, email=email)
+    user = User.objects.get_or_create(username=username, email=email)[0]
     confirmation_code = default_token_generator.make_token(user)
-    yamdb_send_mail(confirmation_code, email)
-    message = {'email': email, 'username': username}
-    return Response(message, status=status.HTTP_200_OK)
-    # if created:
-    #     yamdb_send_mail(confirmation_code, email)
-    #     message = {'email': email, 'username': username}
-    #     return Response(message, status=status.HTTP_200_OK)
-    #User.objects.filter(email=email).update(
-        #confirmation_code=confirmation_code
-    #)
     yamdb_send_mail(confirmation_code, email)
     message = {'email': email, 'username': username}
     return Response(message, status=status.HTTP_200_OK)

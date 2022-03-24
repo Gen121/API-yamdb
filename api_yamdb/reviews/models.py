@@ -51,7 +51,6 @@ class User(AbstractUser):
     role = models.CharField(max_length=len(max(ROLE_CHOICES)),
                             choices=ROLE_CHOICES,
                             default='user', verbose_name='role')
-    confirmation_code = models.CharField(max_length=6)
 
 
 class Review(models.Model):
