@@ -1,12 +1,17 @@
+<<<<<<< HEAD
 import datetime as dt
 from email.policy import default
 
+=======
+>>>>>>> master
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ValidationError
 from rest_framework import serializers
 
-from reviews.models import Category, Comment, Genre, Review, Title, User
+from reviews.models import (Category, Comment, Genre,
+                            QUATERNARY_GEOLOGICAL_PERIOD, Review, Title,
+                            TODAYS_YEAR, User)
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -51,12 +56,11 @@ class TitleEditSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'year', 'description', 'genre', 'category', 'rating',)
 
     def validate_year(self, value):
-        now_year = dt.date.today().year
-        quaternary_geological_period = -2588000
+        now_year = TODAYS_YEAR
         if now_year < value:
             raise serializers.ValidationError(
                 'Невозможна публикация будущих произведений')
-        if value < quaternary_geological_period:
+        if value < QUATERNARY_GEOLOGICAL_PERIOD:
             raise serializers.ValidationError(
                 ' Ограничение для прошлого - антропоген (2,588 млн. лет назад)'
             )
