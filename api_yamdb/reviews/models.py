@@ -1,7 +1,9 @@
 import datetime as dt
 
 from django.contrib.auth.models import AbstractUser
-from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.validators import (MinValueValidator,
+                                    MaxValueValidator,
+                                    RegexValidator)
 from django.db import models
 
 
@@ -10,10 +12,19 @@ TODAYS_YEAR = dt.date.today().year
 MAX_SCORE = 10
 MIN_SCORE = 1
 
+
 class Category(models.Model):
     name = models.CharField(max_length=256)
-    slug = models.SlugField(max_length=50, unique=True)  # TODO: По ТЗ у слага есть регулярка, стоит указать
-# TODO: Всем моделям не помешает verbose_name и verbose_name_plural
+    slug = models.SlugField(max_length=50,
+                            unique=True,
+                            validators=[RegexValidator(
+                                regex=r'^[-a-zA-Z0-9_]+$',
+                                message='Ошибка валидации поля slug'
+                            )])
+
+    class Meta:
+        verbose_name = 'Категория'
+        verbose_name_plural = 'Категории'
 
 
 class Genre(models.Model):
@@ -24,9 +35,8 @@ class Genre(models.Model):
 class Title(models.Model):
     name = models.CharField(max_length=256)
     year = models.IntegerField(validators=(
-            MinValueValidator(QUATERNARY_GEOLOGICAL_PERIOD),
-            MaxValueValidator(TODAYS_YEAR)
-        ))
+        MinValueValidator(QUATERNARY_GEOLOGICAL_PERIOD),
+        MaxValueValidator(TODAYS_YEAR)))
     description = models.TextField(
         blank=True)
     genre = models.ManyToManyField(
@@ -40,8 +50,6 @@ class Title(models.Model):
         blank=True,
         null=True, )
 
-def is_admin(self):
-    return self.role == 'admin'
 
 class GenreTitle(models.Model):
     genre = models.ForeignKey(Genre,
@@ -71,7 +79,7 @@ class Review(models.Model):
         related_name='reviews',
         verbose_name='Произведение'
     )
-    
+
     text = models.TextField(
         verbose_name='Текст отзыва'
     )
