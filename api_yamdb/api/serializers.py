@@ -1,9 +1,3 @@
-<<<<<<< HEAD
-import datetime as dt
-from email.policy import default
-
-=======
->>>>>>> master
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ValidationError
