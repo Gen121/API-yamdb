@@ -1,4 +1,5 @@
 import datetime as dt
+from email.policy import default
 
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
@@ -25,31 +26,29 @@ class GenreSerializer(serializers.ModelSerializer):
 class TitleSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
     genre = GenreSerializer(many=True, read_only=True)
-    rating = serializers.SerializerMethodField()
+    #rating = serializers.SerializerMethodField()
+    rating = serializers.IntegerField(read_only=True, default=None)
 
     class Meta:
         model = Title
         fields = ('id', 'name', 'year', 'rating',
                   'description', 'genre', 'category', )
-
-    def get_rating(self, obj):
-        try:
-            return int(obj.reviews.aggregate(Avg('score'))['score__avg'] + 0.5)  # TODO: Не самое лучшее решение, будет пересчитываться на каждый запрос, покажу во вьюхе
-        except Exception:
-            return None
+        read_only_fields = fields
 
 
-class TitleEditSerializer(TitleSerializer):
+class TitleEditSerializer(serializers.ModelSerializer):
     category = serializers.SlugRelatedField(slug_field='slug',
                                             queryset=Category.objects.all())
     genre = serializers.SlugRelatedField(slug_field='slug',
                                          queryset=Genre.objects.all(),
                                          many=True)
-    description = serializers.CharField(required=False)
+    rating = serializers.IntegerField(read_only=True, default=None)
+    #rating = serializers.SerializerMethodField()
+    #description = serializers.CharField(required=False)
 
     class Meta:
         model = Title
-        fields = ('name', 'year', 'description', 'genre', 'category', )
+        fields = ('id', 'name', 'year', 'description', 'genre', 'category', 'rating',)
 
     def validate_year(self, value):
         now_year = dt.date.today().year
@@ -62,10 +61,6 @@ class TitleEditSerializer(TitleSerializer):
                 ' Ограничение для прошлого - антропоген (2,588 млн. лет назад)'
             )
         return value
-
-    def to_representation(self, instance):  # TODO:  Лишний метод
-        serializer = TitleSerializer(instance)
-        return serializer.data
 
 
 class UserSerializer(serializers.ModelSerializer):

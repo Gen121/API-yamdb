@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, pagination, status, viewsets
@@ -16,8 +17,8 @@ from .permissions import (Admin, AdminModeratorAuthorPermission,
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewSerializer,
                           SendCodeSerializer, SendTokenSerializer,
-                          TitleEditSerializer, UserMeSerializer,
-                          UserSerializer)
+                          TitleEditSerializer, TitleSerializer,
+                          UserMeSerializer, UserSerializer)
 
 
 class CreateListDestroyViewSet(mixins.CreateModelMixin,
@@ -41,14 +42,20 @@ class GenreViewSet(CreateListDestroyViewSet):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.all()  # TODO:
+    queryset = Title.objects.annotate(
+        Avg('reviews__score'))  # TODO:
     # Вот здесь можно подсчитывать рейтинг в одну строку,
     # используя механизмы annotate и Avg, вот документация по этому поводу:
     # https://docs.djangoproject.com/en/3.1/topics/db/aggregation/#order-of-annotate-and-filter-clauses
-    serializer_class = TitleEditSerializer
+    serializer_class = TitleSerializer
     permission_classes = (AdminOrReadOnnly, )
     filter_backends = (DjangoFilterBackend, )
     filterset_class = TitleFilter
+
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return TitleSerializer
+        return TitleEditSerializer
 
 
 class UserViewSet(viewsets.ModelViewSet):

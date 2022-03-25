@@ -6,8 +6,8 @@ class AdminOrReadOnnly(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method not in permissions.SAFE_METHODS:
             try:
-                return 'admin' == request.user.role  # TODO:  Старайтесь никогда не сравнивать роль со строкой, это очень небезопасно и ненадёжно.
-            except AttributeError:                   #        Для этого можно сделать property в классе юзера, которые бы отвечали, админ ли это и т.д
+                return request.user.is_admin
+            except AttributeError:
                 return False
 
         return True
@@ -16,7 +16,7 @@ class AdminOrReadOnnly(permissions.BasePermission):
 class Admin(permissions.BasePermission):
     def has_permission(self, request, view):
         try:
-            return request.user.is_superuser or 'admin' == request.user.role
+            return request.user.is_superuser or request.user.is_admin
         except AttributeError:
             return False
 
@@ -32,8 +32,8 @@ class AdminModeratorAuthorPermission(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.user.is_authenticated:
             return (
-                request.user.is_staff or request.user.role == 'admin'
-                or request.user.role == 'moderator'
+                request.user.is_staff or request.user.is_admin
+                or request.user.is_moderator
                 or obj.author == request.user)
         else:
             return bool(request.method in permissions.SAFE_METHODS)

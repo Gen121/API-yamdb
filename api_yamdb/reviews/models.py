@@ -52,6 +52,14 @@ class User(AbstractUser):
                             choices=ROLE_CHOICES,
                             default='user', verbose_name='role')
 
+    @property
+    def is_admin(self):
+        return self.role == 'admin'
+
+    @property
+    def is_moderator(self):
+        return self.role == 'moderator'
+
 
 class Review(models.Model):
     title = models.ForeignKey(
@@ -59,7 +67,7 @@ class Review(models.Model):
         related_name='reviews',
         verbose_name='Произведение'
     )
-    
+
     text = models.TextField(
         verbose_name='Текст отзыва'
     )
