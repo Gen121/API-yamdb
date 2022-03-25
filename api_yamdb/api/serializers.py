@@ -1,12 +1,11 @@
-import datetime as dt
-
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ValidationError
 from rest_framework import serializers
-from rest_framework.validators import UniqueValidator
 
-from reviews.models import Category, Comment, Genre, Review, Title, User
+from reviews.models import (Category, Comment, Genre,
+                            QUATERNARY_GEOLOGICAL_PERIOD, Review, Title,
+                            TODAYS_YEAR, User)
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -53,12 +52,11 @@ class TitleEditSerializer(TitleSerializer):
         fields = ('name', 'year', 'description', 'genre', 'category', )
 
     def validate_year(self, value):
-        now_year = dt.date.today().year
-        quaternary_geological_period = -2588000
+        now_year = TODAYS_YEAR
         if now_year < value:
             raise serializers.ValidationError(
                 'Невозможна публикация будущих произведений')
-        if value < quaternary_geological_period:
+        if value < QUATERNARY_GEOLOGICAL_PERIOD:
             raise serializers.ValidationError(
                 ' Ограничение для прошлого - антропоген (2,588 млн. лет назад)'
             )
@@ -87,24 +85,27 @@ class UserMeSerializer(serializers.ModelSerializer):
 
 
 class SendCodeSerializer(serializers.Serializer):
-    username = serializers.CharField(
-        required=True,
-        validators=[UniqueValidator(
-            # TODO: Не очень хорошее решение.
-            # Представьте ситуацию:
-            # 1) Пользователь отправил мейл и юзернейм
-            # 2) Система отдала ему письмо с токеном и создала пользователя в базе с таким емейлом и юзернеймом
-            # 3) Пользователь потерял письмо
-            # 4) Пытается отправить ещё раз - а сервер ему ничего не возвращает, потому что такой емейл уже есть в базе
-            # Нужно это обдумать и решить, валидацию на это в сериализаторе стоит удалить.
-            # В качестве родительского класса нужно брать обычный сериализатор, во вьюхе использовать get_or_create
-            queryset=User.objects.all(),
-            message='Пользователь с таким именем уже зарегистрирован')])
-    email = serializers.EmailField(
-        required=True,
-        validators=[UniqueValidator(
-            queryset=User.objects.all(),
-            message='Почтовый адрес уже зарегистрирован')])
+    username = serializers.CharField(required=True)
+    email = serializers.EmailField(required=True)
+
+    def validate(self, data):
+        incomming_user = data['username']
+        incomming_mail = data['email']
+        check_user = User.objects.filter(username=incomming_user)
+        check_mail = User.objects.filter(email=incomming_mail)
+        if check_user and not check_mail:
+            raise serializers.ValidationError(
+                'Пользователь с таким именем существует')
+        if check_mail and not check_user:
+            raise serializers.ValidationError(
+                'Почтовый адрес уже существует')
+        return data
+
+    def validate_username(self, value):
+        if value == 'me':
+            raise serializers.ValidationError(
+                'Нельзя создать пользователя с username = "me"')
+        return value
 
 
 class SendTokenSerializer(serializers.Serializer):
@@ -142,7 +143,7 @@ class ReviewSerializer(serializers.ModelSerializer):
         ):
             raise ValidationError('Один автор, может оставить только один обзор на произведение')
         return data
-    
+
     class Meta:
         model = Review
         fields = ('id', 'text', 'author', 'score', 'pub_date',)
