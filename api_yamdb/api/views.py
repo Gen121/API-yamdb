@@ -138,6 +138,7 @@ def send_token(request):
 
 
 class CommentViewSet(viewsets.ModelViewSet):
+    """Viewset Comment"""
     serializer_class = CommentSerializer
     permission_classes = (AdminModeratorAuthorPermission, )
 
@@ -181,6 +182,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 #         return get_object_or_404(Title, id=self.kwargs.get('title_id'))
 
 class ReviewViewSet(viewsets.ModelViewSet):
+    """Viewset Review."""
     serializer_class = ReviewSerializer
     permission_classes = (AdminModeratorAuthorPermission,)
     

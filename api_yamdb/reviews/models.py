@@ -54,12 +54,12 @@ class User(AbstractUser):
 
 
 class Review(models.Model):
+    """Модель Review"""
     title = models.ForeignKey(
         Title, on_delete=models.CASCADE,
         related_name='reviews',
         verbose_name='Произведение'
     )
-    
     text = models.TextField(
         verbose_name='Текст отзыва'
     )
@@ -99,6 +99,7 @@ class Review(models.Model):
 
 
 class Comment(models.Model):
+    """Модель Comment."""
     review = models.ForeignKey(
         Review,
         on_delete=models.CASCADE,
