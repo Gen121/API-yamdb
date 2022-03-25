@@ -1,4 +1,3 @@
-from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ValidationError
 from rest_framework import serializers
@@ -25,7 +24,6 @@ class GenreSerializer(serializers.ModelSerializer):
 class TitleSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
     genre = GenreSerializer(many=True, read_only=True)
-    #rating = serializers.SerializerMethodField()
     rating = serializers.IntegerField(read_only=True, default=None)
 
     class Meta:
@@ -42,12 +40,11 @@ class TitleEditSerializer(serializers.ModelSerializer):
                                          queryset=Genre.objects.all(),
                                          many=True)
     rating = serializers.IntegerField(read_only=True, default=None)
-    #rating = serializers.SerializerMethodField()
-    #description = serializers.CharField(required=False)
 
     class Meta:
         model = Title
-        fields = ('id', 'name', 'year', 'description', 'genre', 'category', 'rating',)
+        fields = ('id', 'name', 'year', 'description',
+                  'genre', 'category', 'rating',)
 
     def validate_year(self, value):
         now_year = TODAYS_YEAR
@@ -135,7 +132,8 @@ class ReviewSerializer(serializers.ModelSerializer):
             request.method == "POST"
             and Review.objects.filter(title=title, author=author).exists()
         ):
-            raise ValidationError('Один автор, может оставить только один обзор на произведение')
+            raise ValidationError(
+                'Один автор, может оставить только один обзор на произведение')
         return data
 
     class Meta:

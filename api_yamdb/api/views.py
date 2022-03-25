@@ -42,11 +42,7 @@ class GenreViewSet(CreateListDestroyViewSet):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.annotate(
-        Avg('reviews__score'))  # TODO:
-    # Вот здесь можно подсчитывать рейтинг в одну строку,
-    # используя механизмы annotate и Avg, вот документация по этому поводу:
-    # https://docs.djangoproject.com/en/3.1/topics/db/aggregation/#order-of-annotate-and-filter-clauses
+    queryset = Title.objects.annotate(rating=Avg('reviews__score'))
     serializer_class = TitleSerializer
     permission_classes = (AdminOrReadOnnly, )
     filter_backends = (DjangoFilterBackend, )
