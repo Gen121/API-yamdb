@@ -14,6 +14,7 @@ MIN_SCORE = 1
 
 
 class Category(models.Model):
+    """Модель Category."""
     name = models.CharField(max_length=256)
     slug = models.SlugField(max_length=50,
                             unique=True,
@@ -28,6 +29,7 @@ class Category(models.Model):
 
 
 class Genre(models.Model):
+    """Модель Genre."""
     name = models.CharField(max_length=256)
     slug = models.SlugField(max_length=50, unique=True)
 
@@ -37,6 +39,7 @@ class Genre(models.Model):
 
 
 class Title(models.Model):
+    """Модель Title."""
     name = models.CharField(max_length=256)
     year = models.IntegerField(validators=(
         MinValueValidator(QUATERNARY_GEOLOGICAL_PERIOD),
@@ -56,6 +59,7 @@ class Title(models.Model):
 
 
 class GenreTitle(models.Model):
+    """Модель GenreTitle."""
     genre = models.ForeignKey(Genre,
                               related_name='titles',
                               on_delete=models.CASCADE)
@@ -63,6 +67,7 @@ class GenreTitle(models.Model):
 
 
 class User(AbstractUser):
+    """Модель User."""
     ROLE_CHOICES = [
         ('user', 'user'),
         ('moderator', 'moderator'),

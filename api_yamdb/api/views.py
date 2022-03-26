@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.db.models import Avg
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
@@ -41,10 +42,13 @@ class GenreViewSet(CreateListDestroyViewSet):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.all()  # TODO:
+    # queryset = Title.objects.all()  # TODO:
     # Вот здесь можно подсчитывать рейтинг в одну строку,
     # используя механизмы annotate и Avg, вот документация по этому поводу:
     # https://docs.djangoproject.com/en/3.1/topics/db/aggregation/#order-of-annotate-and-filter-clauses
+    queryset = Title.objects.annotate(
+        rating=Avg('reviews__score')
+    ).all()
     serializer_class = TitleEditSerializer
     permission_classes = (AdminOrReadOnnly, )
     filter_backends = (DjangoFilterBackend, )
