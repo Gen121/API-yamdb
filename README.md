@@ -75,7 +75,6 @@ api_yamdb\reviews\management\commands\fill_db.py
 
 ```
 python3 manage.py fill_db
-
 ```
 
 ## Авторы проекта
