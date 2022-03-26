@@ -29,7 +29,7 @@ class Category(models.Model):
 
 class Genre(models.Model):
     name = models.CharField(max_length=256)
-    slug = models.SlugField(max_length=50, unique=True)
+    slug = models.SlugField(max_length=50, unique=True)  # TODO: Тут тоже стоит указать регулярку
 
     class Meta:
         verbose_name = 'Жанр'
@@ -67,18 +67,20 @@ class User(AbstractUser):
         ('user', 'user'),
         ('moderator', 'moderator'),
         ('admin', 'admin'),
-    ]
+    ]  # TODO: Не хватает явного указания поля username
     email = models.EmailField(max_length=254, unique=True)
     first_name = models.CharField(max_length=150, blank=True)
     last_name = models.CharField(max_length=150, blank=True)
     bio = models.TextField(blank=True)
-    role = models.CharField(max_length=len(max(ROLE_CHOICES)),
-                            choices=ROLE_CHOICES,
+    role = models.CharField(max_length=len(max(ROLE_CHOICES)),  # TODO: В ROLE_CHOICES лежат кортежи, 
+                            choices=ROLE_CHOICES,  # так что максимальная длина будет - 2, нужно искать максимальную длину самих строк
                             default='user', verbose_name='role')
 
     @property
     def is_admin(self):
-        return self.role == 'admin'
+        return self.role == 'admin'  # TODO: Тут роль сравнивается с обычной строкой, это не очень хорошо
+# Сперва нужно сделать отдельный класс, где будут в качестве полей все нужные роли, потом к ним обращаться по имени поля
+# А вот там где объявлено ROLES вместо строк использовать значения из ранее созданного класса
 
     @property
     def is_moderator(self):

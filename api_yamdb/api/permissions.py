@@ -7,7 +7,8 @@ class AdminOrReadOnnly(permissions.BasePermission):
         if request.method not in permissions.SAFE_METHODS:
             try:
                 return request.user.is_admin
-            except AttributeError:
+            except AttributeError:  # TODO: А почему тут может быть AttributeError? 
+            # Думаю сперва стоит проверить, что это юзер, а дальше можно и без обработки исключений
                 return False
 
         return True
@@ -17,7 +18,7 @@ class Admin(permissions.BasePermission):
     def has_permission(self, request, view):
         try:
             return request.user.is_superuser or request.user.is_admin
-        except AttributeError:
+        except AttributeError:  # TODO: См. выше
             return False
 
 
@@ -35,5 +36,5 @@ class AdminModeratorAuthorPermission(permissions.BasePermission):
                 request.user.is_staff or request.user.is_admin
                 or request.user.is_moderator
                 or obj.author == request.user)
-        else:
+        else:  # TODO: После return не нужен else
             return bool(request.method in permissions.SAFE_METHODS)

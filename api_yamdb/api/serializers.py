@@ -76,10 +76,11 @@ class UserMeSerializer(serializers.ModelSerializer):
 
 
 class SendCodeSerializer(serializers.Serializer):
-    username = serializers.CharField(required=True)
-    email = serializers.EmailField(required=True)
+    username = serializers.CharField(required=True)  # TODO: Не хватает ограничений, указанных в ТЗ
+    email = serializers.EmailField(required=True)  # TODO: Аналогично
 
-    def validate(self, data):
+    def validate(self, data):  # TODO: Валидацию из сериализатора на это стоит удалить,
+        # это связывает нам руки при попытке запросить повторный токен, поэтому этот функционал располагаем во вьюхе
         incomming_user = data['username']
         incomming_mail = data['email']
         check_user = User.objects.filter(username=incomming_user)

@@ -90,9 +90,10 @@ def yamdb_send_mail(confirmation_code, email):
 def send_code(request):
     serializer = SendCodeSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-    username = request.data.get('username')
+    username = request.data.get('username')  # TODO: Данные нужно брать только отвалидированные, из validated_data
     email = request.data.get('email')
-    user = User.objects.get_or_create(username=username, email=email)[0]
+    user = User.objects.get_or_create(username=username, email=email)[0]  # TODO: После удаления валидации из сериализатора
+                                                        # - эта строка станет опасной, поэтому нужно будет её обернуть в try...except
     confirmation_code = default_token_generator.make_token(user)
     yamdb_send_mail(confirmation_code, email)
     message = {'email': email, 'username': username}
@@ -104,7 +105,7 @@ def send_token(request):
     serializer = SendTokenSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     username = request.data.get('username')
-    token = serializer.data.get('confirmation_code')
+    token = serializer.data.get('confirmation_code')  # TODO: См. выше откуда нужно брать данные
     user = get_object_or_404(User, username=username)
     if default_token_generator.check_token(user, token):
         token = AccessToken.for_user(user)
