@@ -79,20 +79,6 @@ class SendCodeSerializer(serializers.Serializer):
     username = serializers.CharField(required=True)  # TODO: Не хватает ограничений, указанных в ТЗ
     email = serializers.EmailField(required=True)  # TODO: Аналогично
 
-    def validate(self, data):  # TODO: Валидацию из сериализатора на это стоит удалить,
-        # это связывает нам руки при попытке запросить повторный токен, поэтому этот функционал располагаем во вьюхе
-        incomming_user = data['username']
-        incomming_mail = data['email']
-        check_user = User.objects.filter(username=incomming_user)
-        check_mail = User.objects.filter(email=incomming_mail)
-        if check_user and not check_mail:
-            raise serializers.ValidationError(
-                'Пользователь с таким именем существует')
-        if check_mail and not check_user:
-            raise serializers.ValidationError(
-                'Почтовый адрес уже существует')
-        return data
-
     def validate_username(self, value):
         if value == 'me':
             raise serializers.ValidationError(

@@ -4,6 +4,7 @@ from django.core.mail import send_mail
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
+from iniconfig import ParseError
 from rest_framework import filters, mixins, pagination, status, viewsets
 from rest_framework.decorators import action, api_view
 from rest_framework.permissions import IsAuthenticated
@@ -90,10 +91,17 @@ def yamdb_send_mail(confirmation_code, email):
 def send_code(request):
     serializer = SendCodeSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-    username = request.data.get('username')  # TODO: Данные нужно брать только отвалидированные, из validated_data
-    email = request.data.get('email')
-    user = User.objects.get_or_create(username=username, email=email)[0]  # TODO: После удаления валидации из сериализатора
-                                                        # - эта строка станет опасной, поэтому нужно будет её обернуть в try...except
+    username = serializer.validated_data.get('username')
+    email = serializer.validated_data.get('email')
+    user = User.objects.filter(username=username).exists()
+    mail = User.objects.filter(email=email).exists()
+    if (user and not mail) or (mail and not user):
+        return Response('Неверный код подтверждения', status=status.HTTP_400_BAD_REQUEST)
+    try:
+        user = User.objects.get_or_create(username=username, email=email)[0]  # TODO: После удаления валидации из сериализатора
+    except NameError:
+        'Такой пользователь уже существует'
+                                                            # - эта строка станет опасной, поэтому нужно будет её обернуть в try...except
     confirmation_code = default_token_generator.make_token(user)
     yamdb_send_mail(confirmation_code, email)
     message = {'email': email, 'username': username}
@@ -104,8 +112,8 @@ def send_code(request):
 def send_token(request):
     serializer = SendTokenSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-    username = request.data.get('username')
-    token = serializer.data.get('confirmation_code')  # TODO: См. выше откуда нужно брать данные
+    username = serializer.validated_data.get('username')
+    token = serializer.validated_data.get('confirmation_code')  # TODO: См. выше откуда нужно брать данные
     user = get_object_or_404(User, username=username)
     if default_token_generator.check_token(user, token):
         token = AccessToken.for_user(user)

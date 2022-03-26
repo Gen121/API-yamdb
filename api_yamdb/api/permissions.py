@@ -1,4 +1,5 @@
 from rest_framework import permissions
+from reviews.models import Roles
 
 
 class AdminOrReadOnnly(permissions.BasePermission):
@@ -36,5 +37,4 @@ class AdminModeratorAuthorPermission(permissions.BasePermission):
                 request.user.is_staff or request.user.is_admin
                 or request.user.is_moderator
                 or obj.author == request.user)
-        else:  # TODO: После return не нужен else
-            return bool(request.method in permissions.SAFE_METHODS)
+        return bool(request.method in permissions.SAFE_METHODS)
