@@ -80,11 +80,11 @@ python3 manage.py fill_db
 
 ## Авторы проекта
 
-![Михаил Патраков](<img src="https://avatars.githubusercontent.com/u/93536393?v=4" width="150"> "Михаил Патраков") [Михаил Патраков](https://github.com/MikhailPatrakov) - 
+[Михаил Патраков](https://github.com/MikhailPatrakov) - 
 система регистрации и аутентификации, права доступа, работа с токенами, система подтверждения через e-mail
 
-![Константин Тошин](<img src="https://avatars.githubusercontent.com/u/93771436?v=4" width="150"> "Константин Тошин") [Константин Тошин](https://github.com/KonstantinToshin) -
+[Константин Тошин](https://github.com/KonstantinToshin) -
 система отзывов, комментариев и рейтинга: модели, представления, сериализация и маршрутизация для них
 
-![Евгений Челноков](<img src="https://avatars.githubusercontent.com/u/71381458?v=4" width="150"> "Евгений Челноков") [Евгений Челноков](https://github.com/Gen121) -
+[Евгений Челноков](https://github.com/Gen121) -
 система категорий, жанров и произведений: модели, представления, сериализация и маршрутизация для них
