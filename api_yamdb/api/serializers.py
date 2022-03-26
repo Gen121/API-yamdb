@@ -1,4 +1,3 @@
-from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ValidationError
 from rest_framework import serializers
@@ -25,31 +24,27 @@ class GenreSerializer(serializers.ModelSerializer):
 class TitleSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
     genre = GenreSerializer(many=True, read_only=True)
-    rating = serializers.SerializerMethodField()
+    rating = serializers.IntegerField(read_only=True, default=None)
 
     class Meta:
         model = Title
         fields = ('id', 'name', 'year', 'rating',
                   'description', 'genre', 'category', )
-
-    def get_rating(self, obj):
-        try:
-            return int(obj.reviews.aggregate(Avg('score'))['score__avg'] + 0.5)  # TODO: Не самое лучшее решение, будет пересчитываться на каждый запрос, покажу во вьюхе
-        except Exception:
-            return None
+        read_only_fields = fields
 
 
-class TitleEditSerializer(TitleSerializer):
+class TitleEditSerializer(serializers.ModelSerializer):
     category = serializers.SlugRelatedField(slug_field='slug',
                                             queryset=Category.objects.all())
     genre = serializers.SlugRelatedField(slug_field='slug',
                                          queryset=Genre.objects.all(),
                                          many=True)
-    description = serializers.CharField(required=False)
+    rating = serializers.IntegerField(read_only=True, default=None)
 
     class Meta:
         model = Title
-        fields = ('name', 'year', 'description', 'genre', 'category', )
+        fields = ('id', 'name', 'year', 'description',
+                  'genre', 'category', 'rating',)
 
     def validate_year(self, value):
         now_year = TODAYS_YEAR
@@ -61,10 +56,6 @@ class TitleEditSerializer(TitleSerializer):
                 ' Ограничение для прошлого - антропоген (2,588 млн. лет назад)'
             )
         return value
-
-    def to_representation(self, instance):  # TODO:  Лишний метод
-        serializer = TitleSerializer(instance)
-        return serializer.data
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -85,10 +76,11 @@ class UserMeSerializer(serializers.ModelSerializer):
 
 
 class SendCodeSerializer(serializers.Serializer):
-    username = serializers.CharField(required=True)
-    email = serializers.EmailField(required=True)
+    username = serializers.CharField(required=True)  # TODO: Не хватает ограничений, указанных в ТЗ
+    email = serializers.EmailField(required=True)  # TODO: Аналогично
 
-    def validate(self, data):
+    def validate(self, data):  # TODO: Валидацию из сериализатора на это стоит удалить,
+        # это связывает нам руки при попытке запросить повторный токен, поэтому этот функционал располагаем во вьюхе
         incomming_user = data['username']
         incomming_mail = data['email']
         check_user = User.objects.filter(username=incomming_user)
@@ -141,7 +133,8 @@ class ReviewSerializer(serializers.ModelSerializer):
             request.method == "POST"
             and Review.objects.filter(title=title, author=author).exists()
         ):
-            raise ValidationError('Один автор, может оставить только один обзор на произведение')
+            raise ValidationError(
+                'Один автор, может оставить только один обзор на произведение')
         return data
 
     class Meta:

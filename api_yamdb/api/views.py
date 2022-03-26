@@ -2,6 +2,7 @@ from django.conf import settings
 from django.db.models import Avg
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, pagination, status, viewsets
@@ -17,8 +18,8 @@ from .permissions import (Admin, AdminModeratorAuthorPermission,
 from .serializers import (CategorySerializer, CommentSerializer,
                           GenreSerializer, ReviewSerializer,
                           SendCodeSerializer, SendTokenSerializer,
-                          TitleEditSerializer, UserMeSerializer,
-                          UserSerializer)
+                          TitleEditSerializer, TitleSerializer,
+                          UserMeSerializer, UserSerializer)
 
 
 class CreateListDestroyViewSet(mixins.CreateModelMixin,
@@ -42,17 +43,16 @@ class GenreViewSet(CreateListDestroyViewSet):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    # queryset = Title.objects.all()  # TODO:
-    # Вот здесь можно подсчитывать рейтинг в одну строку,
-    # используя механизмы annotate и Avg, вот документация по этому поводу:
-    # https://docs.djangoproject.com/en/3.1/topics/db/aggregation/#order-of-annotate-and-filter-clauses
-    queryset = Title.objects.annotate(
-        rating=Avg('reviews__score')
-    ).all()
-    serializer_class = TitleEditSerializer
+    queryset = Title.objects.annotate(rating=Avg('reviews__score'))
+    serializer_class = TitleSerializer
     permission_classes = (AdminOrReadOnnly, )
     filter_backends = (DjangoFilterBackend, )
     filterset_class = TitleFilter
+
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return TitleSerializer
+        return TitleEditSerializer
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -91,9 +91,10 @@ def yamdb_send_mail(confirmation_code, email):
 def send_code(request):
     serializer = SendCodeSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
-    username = request.data.get('username')
+    username = request.data.get('username')  # TODO: Данные нужно брать только отвалидированные, из validated_data
     email = request.data.get('email')
-    user = User.objects.get_or_create(username=username, email=email)[0]
+    user = User.objects.get_or_create(username=username, email=email)[0]  # TODO: После удаления валидации из сериализатора
+                                                        # - эта строка станет опасной, поэтому нужно будет её обернуть в try...except
     confirmation_code = default_token_generator.make_token(user)
     yamdb_send_mail(confirmation_code, email)
     message = {'email': email, 'username': username}
@@ -105,7 +106,7 @@ def send_token(request):
     serializer = SendTokenSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     username = request.data.get('username')
-    token = serializer.data.get('confirmation_code')
+    token = serializer.data.get('confirmation_code')  # TODO: См. выше откуда нужно брать данные
     user = get_object_or_404(User, username=username)
     if default_token_generator.check_token(user, token):
         token = AccessToken.for_user(user)
@@ -140,11 +141,11 @@ class ReviewViewSet(viewsets.ModelViewSet):
     permission_classes = (AdminModeratorAuthorPermission,)
 
     def get_queryset(self):
-        title = get_object_or_404(Title, id=self.kwargs.get("title_id"))
+        title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
         return title.reviews.all()
 
     def perform_create(self, serializer):
-        title = get_object_or_404(Title, id=self.kwargs.get("title_id"))
+        title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
         serializer.save(author=self.request.user, title=title)
 
     def get_title(self):
