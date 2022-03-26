@@ -68,12 +68,7 @@ class GenreTitle(models.Model):
                               on_delete=models.CASCADE)
     title = models.ForeignKey(Title, on_delete=models.CASCADE)
 
-RoleChoises(models.TEXt):
-    _user = 'user'
-    _admin = 'admin'
-    _moderator = 'moderator'
-    
-    d
+
 
 class User(AbstractUser):
     """Модель User."""
@@ -86,7 +81,7 @@ class User(AbstractUser):
     first_name = models.CharField(max_length=150, blank=True)
     last_name = models.CharField(max_length=150, blank=True)
     bio = models.TextField(blank=True)
-    role = models.Choices CharField(max_length=len(max(ROLE_CHOICES)),  # TODO: В ROLE_CHOICES лежат кортежи, 
+    role = models.CharField(max_length=len(max(ROLE_CHOICES)),  # TODO: В ROLE_CHOICES лежат кортежи, 
                             choices=ROLE_CHOICES,  # так что максимальная длина будет - 2, нужно искать максимальную длину самих строк
                             default='user', verbose_name='role')
 
