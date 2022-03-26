@@ -20,8 +20,7 @@ class Category(models.Model):
                             unique=True,
                             validators=[RegexValidator(
                                 regex=r'^[-a-zA-Z0-9_]+$',
-                                message='Ошибка валидации поля slug'
-                            )])
+                                message='Ошибка валидации поля slug')])
 
     class Meta:
         verbose_name = 'Категория'
@@ -30,7 +29,11 @@ class Category(models.Model):
 
 class Genre(models.Model):
     name = models.CharField(max_length=256)
-    slug = models.SlugField(max_length=50, unique=True)  # TODO: Тут тоже стоит указать регулярку
+    slug = models.SlugField(max_length=50,
+                            unique=True,
+                            validators=[RegexValidator(
+                                regex=r'^[-a-zA-Z0-9_]+$',
+                                message='Ошибка валидации поля slug')])
 
     class Meta:
         verbose_name = 'Жанр'
