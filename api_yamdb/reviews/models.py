@@ -19,8 +19,7 @@ class Category(models.Model):
                             unique=True,
                             validators=[RegexValidator(
                                 regex=r'^[-a-zA-Z0-9_]+$',
-                                message='Ошибка валидации поля slug'
-                            )])
+                                message='Ошибка валидации поля slug')])
 
     class Meta:
         verbose_name = 'Категория'
@@ -29,7 +28,11 @@ class Category(models.Model):
 
 class Genre(models.Model):
     name = models.CharField(max_length=256)
-    slug = models.SlugField(max_length=50, unique=True)  # TODO: Тут тоже стоит указать регулярку
+    slug = models.SlugField(max_length=50,
+                            unique=True,
+                            validators=[RegexValidator(
+                                regex=r'^[-a-zA-Z0-9_]+$',
+                                message='Ошибка валидации поля slug')])
 
     class Meta:
         verbose_name = 'Жанр'
@@ -61,6 +64,12 @@ class GenreTitle(models.Model):
                               on_delete=models.CASCADE)
     title = models.ForeignKey(Title, on_delete=models.CASCADE)
 
+RoleChoises(models.TEXt):
+    _user = 'user'
+    _admin = 'admin'
+    _moderator = 'moderator'
+    
+    d
 
 class User(AbstractUser):
     ROLE_CHOICES = [
@@ -72,7 +81,7 @@ class User(AbstractUser):
     first_name = models.CharField(max_length=150, blank=True)
     last_name = models.CharField(max_length=150, blank=True)
     bio = models.TextField(blank=True)
-    role = models.CharField(max_length=len(max(ROLE_CHOICES)),  # TODO: В ROLE_CHOICES лежат кортежи, 
+    role = models.Choices CharField(max_length=len(max(ROLE_CHOICES)),  # TODO: В ROLE_CHOICES лежат кортежи, 
                             choices=ROLE_CHOICES,  # так что максимальная длина будет - 2, нужно искать максимальную длину самих строк
                             default='user', verbose_name='role')
 
