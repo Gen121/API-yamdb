@@ -1,10 +1,9 @@
-from django.shortcuts import get_object_or_404
 from django.core.exceptions import ValidationError
+from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
-from reviews.models import (Category, Comment, Genre,
-                            QUATERNARY_GEOLOGICAL_PERIOD, Review, Title,
-                            TODAYS_YEAR, User)
+from reviews.models import (QUATERNARY_GEOLOGICAL_PERIOD, TODAYS_YEAR,
+                            Category, Comment, Genre, Review, Title, User)
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -76,8 +75,8 @@ class UserMeSerializer(serializers.ModelSerializer):
 
 
 class SendCodeSerializer(serializers.Serializer):
-    username = serializers.CharField(required=True)  # TODO: Не хватает ограничений, указанных в ТЗ
-    email = serializers.EmailField(required=True)  # TODO: Аналогично
+    username = serializers.CharField(max_length=150, required=True)
+    email = serializers.EmailField(max_length=254, required=True)
 
     def validate_username(self, value):
         if value == 'me':
@@ -85,9 +84,13 @@ class SendCodeSerializer(serializers.Serializer):
                 'Нельзя создать пользователя с username = "me"')
         return value
 
+    class Meta:
+        fields = ('username', 'email',)
+        model = User
+
 
 class SendTokenSerializer(serializers.Serializer):
-    username = serializers.CharField(required=True)
+    username = serializers.CharField(max_length=150, required=True)
     confirmation_code = serializers.CharField(required=True)
 
 

@@ -2,11 +2,9 @@ import datetime as dt
 from enum import Enum
 
 from django.contrib.auth.models import AbstractUser
-from django.core.validators import (MinValueValidator,
-                                    MaxValueValidator,
+from django.core.validators import (MaxValueValidator, MinValueValidator,
                                     RegexValidator)
 from django.db import models
-
 
 QUATERNARY_GEOLOGICAL_PERIOD = -2588000
 TODAYS_YEAR = dt.date.today().year
