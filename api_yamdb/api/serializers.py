@@ -1,10 +1,9 @@
-from django.shortcuts import get_object_or_404
 from django.core.exceptions import ValidationError
+from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 
-from reviews.models import (Category, Comment, Genre,
-                            QUATERNARY_GEOLOGICAL_PERIOD, Review, Title,
-                            TODAYS_YEAR, User)
+from reviews.models import (QUATERNARY_GEOLOGICAL_PERIOD, TODAYS_YEAR,
+                            Category, Comment, Genre, Review, Title, User)
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -76,22 +75,8 @@ class UserMeSerializer(serializers.ModelSerializer):
 
 
 class SendCodeSerializer(serializers.Serializer):
-    username = serializers.CharField(required=True)  # TODO: Не хватает ограничений, указанных в ТЗ
-    email = serializers.EmailField(required=True)  # TODO: Аналогично
-
-    def validate(self, data):  # TODO: Валидацию из сериализатора на это стоит удалить,
-        # это связывает нам руки при попытке запросить повторный токен, поэтому этот функционал располагаем во вьюхе
-        incomming_user = data['username']
-        incomming_mail = data['email']
-        check_user = User.objects.filter(username=incomming_user)
-        check_mail = User.objects.filter(email=incomming_mail)
-        if check_user and not check_mail:
-            raise serializers.ValidationError(
-                'Пользователь с таким именем существует')
-        if check_mail and not check_user:
-            raise serializers.ValidationError(
-                'Почтовый адрес уже существует')
-        return data
+    username = serializers.CharField(max_length=150, required=True)
+    email = serializers.EmailField(max_length=254, required=True)
 
     def validate_username(self, value):
         if value == 'me':
@@ -101,7 +86,7 @@ class SendCodeSerializer(serializers.Serializer):
 
 
 class SendTokenSerializer(serializers.Serializer):
-    username = serializers.CharField(required=True)
+    username = serializers.CharField(max_length=150, required=True)
     confirmation_code = serializers.CharField(required=True)
 
 
@@ -124,6 +109,10 @@ class ReviewSerializer(serializers.ModelSerializer):
         slug_field='username'
     )
 
+    class Meta:
+        model = Review
+        fields = ('id', 'text', 'author', 'score', 'pub_date',)
+
     def validate(self, data):
         request = self.context['request']
         author = request.user
@@ -136,7 +125,3 @@ class ReviewSerializer(serializers.ModelSerializer):
             raise ValidationError(
                 'Один автор, может оставить только один обзор на произведение')
         return data
-
-    class Meta:
-        model = Review
-        fields = ('id', 'text', 'author', 'score', 'pub_date',)
