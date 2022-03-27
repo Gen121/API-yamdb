@@ -84,10 +84,6 @@ class SendCodeSerializer(serializers.Serializer):
                 'Нельзя создать пользователя с username = "me"')
         return value
 
-    class Meta:
-        fields = ('username', 'email',)
-        model = User
-
 
 class SendTokenSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=150, required=True)
@@ -113,6 +109,10 @@ class ReviewSerializer(serializers.ModelSerializer):
         slug_field='username'
     )
 
+    class Meta:
+        model = Review
+        fields = ('id', 'text', 'author', 'score', 'pub_date',)
+
     def validate(self, data):
         request = self.context['request']
         author = request.user
@@ -125,7 +125,3 @@ class ReviewSerializer(serializers.ModelSerializer):
             raise ValidationError(
                 'Один автор, может оставить только один обзор на произведение')
         return data
-
-    class Meta:
-        model = Review
-        fields = ('id', 'text', 'author', 'score', 'pub_date',)

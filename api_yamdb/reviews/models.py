@@ -87,7 +87,11 @@ class Roles(Enum):
 
 
 class User(AbstractUser):
-    username = models.CharField(max_length=150, unique=True)
+    username = models.CharField(max_length=150,
+                                unique=True,
+                                validators=[RegexValidator(
+                                    regex=r'^[\w.@+-]+$',
+                                    message='Ошибка валидации поля slug')])
     email = models.EmailField(max_length=254, unique=True)
     first_name = models.CharField(max_length=150, blank=True)
     last_name = models.CharField(max_length=150, blank=True)
@@ -98,7 +102,7 @@ class User(AbstractUser):
 
     @property
     def is_admin(self):
-        return bool(self.role == Roles.get_admin())
+        return bool(self.role == Roles.get_admin() or self.is_staff)
 
     @property
     def is_moderator(self):
