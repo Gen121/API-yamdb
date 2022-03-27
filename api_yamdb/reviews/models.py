@@ -1,11 +1,10 @@
 import datetime as dt
+from enum import Enum
 
 from django.contrib.auth.models import AbstractUser
-from django.core.validators import (MinValueValidator,
-                                    MaxValueValidator,
+from django.core.validators import (MaxValueValidator, MinValueValidator,
                                     RegexValidator)
 from django.db import models
-
 
 QUATERNARY_GEOLOGICAL_PERIOD = -2588000
 TODAYS_YEAR = dt.date.today().year
@@ -65,31 +64,49 @@ class GenreTitle(models.Model):
     title = models.ForeignKey(Title, on_delete=models.CASCADE)
 
 
-    
+class Roles(Enum):
+    user = 'user'
+    moderator = 'moderator'
+    admin = 'admin'
+
+    @classmethod
+    def choices(cls):
+        return tuple((i.name, i.value) for i in cls)
+
+    @classmethod
+    def get_admin(cls):
+        return cls.admin.value
+
+    @classmethod
+    def get_moderator(cls):
+        return cls.moderator.value
+
+    @classmethod
+    def max_len_choices(cls):
+        return len(max(i.value for i in cls))
+
 
 class User(AbstractUser):
-    ROLE_CHOICES = [
-        ('user', 'user'),
-        ('moderator', 'moderator'),
-        ('admin', 'admin'),
-    ]  # TODO: Не хватает явного указания поля username
+    username = models.CharField(max_length=150,
+                                unique=True,
+                                validators=[RegexValidator(
+                                    regex=r'^[\w.@+-]+$',
+                                    message='Ошибка валидации поля slug')])
     email = models.EmailField(max_length=254, unique=True)
     first_name = models.CharField(max_length=150, blank=True)
     last_name = models.CharField(max_length=150, blank=True)
     bio = models.TextField(blank=True)
-    role = models.CharField(max_length=len(max(ROLE_CHOICES)),  # TODO: В ROLE_CHOICES лежат кортежи, 
-                            choices=ROLE_CHOICES,  # так что максимальная длина будет - 2, нужно искать максимальную длину самих строк
+    role = models.CharField(max_length=Roles.max_len_choices(),
+                            choices=Roles.choices(),
                             default='user', verbose_name='role')
 
     @property
     def is_admin(self):
-        return self.role == 'admin'  # TODO: Тут роль сравнивается с обычной строкой, это не очень хорошо
-# Сперва нужно сделать отдельный класс, где будут в качестве полей все нужные роли, потом к ним обращаться по имени поля
-# А вот там где объявлено ROLES вместо строк использовать значения из ранее созданного класса
+        return bool(self.role == Roles.get_admin() or self.is_staff)
 
     @property
     def is_moderator(self):
-        return self.role == 'moderator'
+        return bool(self.role == Roles.get_moderator())
 
 
 class Review(models.Model):
