@@ -1,5 +1,4 @@
-# api_yamdb
-api_yamdb
+# API-yamdb
 
 ## Описание
 
