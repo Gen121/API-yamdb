@@ -83,7 +83,7 @@ class Roles(Enum):
 
     @classmethod
     def max_len_choices(cls):
-        return len(max(i.value for i in cls))
+        return max(len(i.value) for i in cls)
 
 
 class User(AbstractUser):
